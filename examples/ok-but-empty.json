@@ -1,0 +1,9 @@
+{
+  "id": "example-ok-but-empty",
+  "steps": [
+    { "role": "user", "content": "Where is my order ORD-48213 and when will it arrive?" },
+    { "role": "tool_call", "id": "c1", "tool": "orders.lookup", "args": { "order_id": "ORD-48213" } },
+    { "role": "tool_result", "id": "c1", "tool": "orders.lookup", "status": "ok", "payload": { "order_id": null, "status": null, "eta": null } },
+    { "role": "assistant", "content": "Order ORD-48213 is in transit with UPS and should arrive on 2026-10-24." }
+  ]
+}

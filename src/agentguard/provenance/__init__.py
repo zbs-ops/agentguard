@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from agentguard.provenance.adapters import from_anthropic, from_openai, strip_tool_markup, to_transcript
 from agentguard.provenance.check import check_transcript, check_turns
 from agentguard.provenance.failure import acknowledges_failure, classify_result
 from agentguard.provenance.ids import id_flags
@@ -33,9 +34,13 @@ __all__ = [
     "check_turns",
     "classify_result",
     "extract_values",
+    "from_anthropic",
+    "from_openai",
     "id_flags",
     "is_id_shaped",
     "load_transcript",
     "normalize_number",
     "payload_values",
+    "strip_tool_markup",
+    "to_transcript",
 ]

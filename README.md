@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 153 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 167 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard
@@ -53,6 +53,17 @@ It reads the user, the system prompt, the tool calls and their results, and norm
 
 For the short, high-yield list, `id_flags(verdict)` keeps only flags about an invented order number or product code, the fabrication that does the most harm.
 
+It reads your agent's real logs directly. `to_transcript` takes an **OpenAI** chat log (`tool_calls` / role `tool`), an **Anthropic** messages log (`tool_use` / `tool_result` blocks), or agentguard's own `{"steps": [...]}`, and works out which one it got:
+
+```python
+import json
+from agentguard.provenance import check_transcript, to_transcript
+
+v = check_transcript(to_transcript(json.load(open("run.json"))))
+```
+
+Tool calls a model also writes into its message text (Claude's `<function_calls>` markup) are stripped first, so tool names aren't read as invented claims. On tool-truth's example logs, agentguard prints exactly the flags and values the TypeScript original prints, in the same order (`tests/test_parity.py`).
+
 ### 3. A benchmark: how often can a command gate be talked around?
 
 Give an agent a shell and you put a gate in front of it: a list of commands it may not run. This rewrites a forbidden command in 13 known bypass styles (chaining, quoting, `$IFS`, variable indirection, `awk`, `base64`, equivalent binaries) and counts a bypass **only when the forbidden effect actually happens in a sandbox**.
@@ -93,7 +104,7 @@ def test_my_shell_gate_holds(assert_gate_holds):
 ## A command line
 
 ```bash
-agentguard check run.json            # exit 1 if the transcript states ungrounded values
+agentguard check run.json            # OpenAI, Anthropic or agentguard format; exit 1 if flagged
 agentguard check run.json --ids-only # only high-confidence invented IDs
 agentguard gate refund.create --cost 9000 --amount 9000
 agentguard bench                     # the shell-gate scorecard

@@ -69,14 +69,14 @@ def _month_number(name: str) -> str:
     return str(_MONTH_NAMES.index(name[:3].lower()) + 1).zfill(2)
 
 
-def _add_date(found: set[str], year: str | None, month: str, day: str) -> None:
+def _add_date(found: dict[str, None], year: str | None, month: str, day: str) -> None:
     """Record a date as its ISO form (when the year is known), plus a month-day token and the
     year alone, so "May 19" and "May 19, 2024" both meet a tool's 2024-05-19."""
     md = f"{month}-{day.zfill(2)}"
-    found.add(md)
+    found[md] = None
     if year:
-        found.add(f"{year}-{md}")
-        found.add(year)
+        found[f"{year}-{md}"] = None
+        found[year] = None
 
 
 _ISO_DATE = re.compile(r"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)")
@@ -107,7 +107,9 @@ _NUMBER = re.compile(r"(?<![A-Za-z0-9_.-])[$€£]?\s?-?\d[\d,]*(?:\.\d+)?%?(?![
 def extract_values(text: str) -> list[str]:
     """Every concrete value stated in ``text``, normalized so the same fact in different forms
     ("May 19, 2024" and ``2024-05-19``; "$1,024" and ``1024``) comes out as the same token."""
-    found: set[str] = set()
+    # An insertion-ordered dict, like a JS Set: values come out in the order they were found,
+    # so the same text always gives the same list (a Python set's order varies by process).
+    found: dict[str, None] = {}
 
     # Markdown list markers ("4. **Kettle**") are numbering, not facts, unless a month precedes
     # the number ("on May 21. 3. Modify"), where the "21." is a date, not a marker.
@@ -153,7 +155,7 @@ def extract_values(text: str) -> list[str]:
             hour += 12
         if am and hour == 12:
             hour = 0
-        found.add(f"{hour}:{minute or '00'}")
+        found[f"{hour}:{minute or '00'}"] = None
         return " "
 
     prose = _TIME.sub(_time, prose)
@@ -172,26 +174,26 @@ def extract_values(text: str) -> list[str]:
         token = m.group(0)
         if re.fullmatch(r"\d+(?:-[A-Za-z]+)+", token):
             continue
-        found.add(token)
+        found[token] = None
         for part in re.split(r"[-_]", token):
             if re.fullmatch(r"\d{4,}", part):
-                found.add(str(int(part)))
+                found[str(int(part))] = None
             elif re.fullmatch(r"[A-Za-z]{3,}", part) and "_" in token:
-                found.add(part.lower())
+                found[part.lower()] = None
     # Codes mixing letters and digits with no separator (HAT266, W5272531), taken whole.
     for m in _RUN_ID.finditer(prose):
-        found.add(m.group(0))
+        found[m.group(0)] = None
     # Quoted strings, minus the trailing punctuation American style puts inside the quotes.
     for m in _QUOTED.finditer(prose):
         q = re.sub(r"[\s.,;:!?]+$", "", m.group(1))
         if len(q) >= 3:  # two-letter quotes ("no", "ok") are instructions, not claims
-            found.add(q)
+            found[q] = None
     # Standalone numbers only: never digits glued to letters, which belong to a code.
     for m in _NUMBER.finditer(prose):
         n = normalize_number(m.group(0))
         if n is None or _is_trivial(n):
             continue
-        found.add(n)
+        found[n] = None
     return list(found)
 
 
