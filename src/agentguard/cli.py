@@ -1,6 +1,6 @@
 """The ``agentguard`` command line.
 
-- ``agentguard check <log.json>``: check an agent transcript for invented values. Exit code 1
+- ``agentguard check <log.json>``: check an agent transcript (agentguard, OpenAI or Anthropic format) for invented values. Exit code 1
   when it's flagged, so it can gate a CI job over saved runs. ``--ids-only`` keeps only
   high-confidence invented-ID flags.
 - ``agentguard gate <tool> [--cost C] [--amount A] [--limit L] [--spent S]``: ask the policy
@@ -16,13 +16,13 @@ import sys
 from collections.abc import Sequence
 
 from agentguard.gate import Budget, evaluate
-from agentguard.provenance import check_transcript, id_flags, load_transcript
+from agentguard.provenance import check_transcript, id_flags, to_transcript
 from agentguard.shell import format_report, run_bench
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
     with open(args.log, encoding="utf-8") as fh:
-        transcript = load_transcript(json.load(fh))
+        transcript = to_transcript(json.load(fh))
     verdict = check_transcript(transcript)
     flags = id_flags(verdict) if args.ids_only else list(verdict.flags)
     if not flags:

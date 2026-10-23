@@ -1,10 +1,10 @@
 name: Publish to PyPI
 
-# Fires when a GitHub release is published. Uses PyPI Trusted Publishing (OIDC), so there is
-# no token to store: the project's publisher on PyPI is linked to this repo and workflow.
+# Run by hand (Actions > Publish to PyPI > Run workflow) once the PyPI trusted publisher is set
+# up. Uses PyPI Trusted Publishing (OIDC), so there is no token to store: the project's
+# publisher on PyPI is linked to this repo and workflow.
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   publish:
