@@ -1,0 +1,390 @@
+{
+  "chain": [
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "support-agent",
+      "proposalId": "act_0001",
+      "detail": {
+        "tool": "crm.read",
+        "estimated": "$0.00"
+      },
+      "seq": 1,
+      "prevHash": "GENESIS",
+      "hash": "6403c19c8183c73359a88927e5f7f027b14cc1e110cbf3e2e21b0aaaf4913b93"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0001",
+      "detail": {
+        "verdict": "ALLOW",
+        "tier": 1,
+        "decidedBy": "read-only"
+      },
+      "seq": 2,
+      "prevHash": "6403c19c8183c73359a88927e5f7f027b14cc1e110cbf3e2e21b0aaaf4913b93",
+      "hash": "6c846f6f2a676313b5d2d3d478bb8baf1e80d7b181a906a04c245fd58267d9f6"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "EXECUTED",
+      "actor": "runtime",
+      "proposalId": "act_0001",
+      "detail": {
+        "tool": "crm.read",
+        "cost": "$0.00"
+      },
+      "seq": 3,
+      "prevHash": "6c846f6f2a676313b5d2d3d478bb8baf1e80d7b181a906a04c245fd58267d9f6",
+      "hash": "1ac42b48312bc894c2dde0c41ba8883dccdfaa24e813844ffd3cff0135bfe5fb"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "support-agent",
+      "proposalId": "act_0002",
+      "detail": {
+        "tool": "ticket.create",
+        "estimated": "$0.00"
+      },
+      "seq": 4,
+      "prevHash": "1ac42b48312bc894c2dde0c41ba8883dccdfaa24e813844ffd3cff0135bfe5fb",
+      "hash": "a8ccb2966c90df8dedb167606668456c26cb7f16f0372bae3d806d0786eba3b5"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0002",
+      "detail": {
+        "verdict": "ALLOW",
+        "tier": 2,
+        "decidedBy": "internal-write"
+      },
+      "seq": 5,
+      "prevHash": "a8ccb2966c90df8dedb167606668456c26cb7f16f0372bae3d806d0786eba3b5",
+      "hash": "62e79541c30e8d50e946e1e83e4bfa67c2cc55a2220ccf22f6289ea648c24ed0"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "EXECUTED",
+      "actor": "runtime",
+      "proposalId": "act_0002",
+      "detail": {
+        "tool": "ticket.create",
+        "cost": "$0.00"
+      },
+      "seq": 6,
+      "prevHash": "62e79541c30e8d50e946e1e83e4bfa67c2cc55a2220ccf22f6289ea648c24ed0",
+      "hash": "4d73bb63dd7bf9421b9ef8d8f57287e69508800aa7f5cca35cbc44a95beaeea0"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "billing-agent",
+      "proposalId": "act_0003",
+      "detail": {
+        "tool": "refund.issue",
+        "estimated": "$124.00"
+      },
+      "seq": 7,
+      "prevHash": "4d73bb63dd7bf9421b9ef8d8f57287e69508800aa7f5cca35cbc44a95beaeea0",
+      "hash": "a916ecc092c404cd9dd30f5092d3b20ca75d2c7654851aa11937d85dd0041490"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0003",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "money-movement"
+      },
+      "seq": 8,
+      "prevHash": "a916ecc092c404cd9dd30f5092d3b20ca75d2c7654851aa11937d85dd0041490",
+      "hash": "998cb08ed8e8ad89f23a226b46bdace5fd4f03dd162696dd0e99012bc29c166f"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "growth-agent",
+      "proposalId": "act_0004",
+      "detail": {
+        "tool": "email.send",
+        "estimated": "$9.00"
+      },
+      "seq": 9,
+      "prevHash": "998cb08ed8e8ad89f23a226b46bdace5fd4f03dd162696dd0e99012bc29c166f",
+      "hash": "f4b4bc54392fffbdc6d8799ca1af2dcf382d3ce80bb0ec039922e2715e149305"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0004",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "customer-contact"
+      },
+      "seq": 10,
+      "prevHash": "f4b4bc54392fffbdc6d8799ca1af2dcf382d3ce80bb0ec039922e2715e149305",
+      "hash": "d4ff8e72de5d14338b36e7e5682f30eed30e4270e09fc04ca273b8d8be9f6434"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "rogue-agent",
+      "proposalId": "act_0005",
+      "detail": {
+        "tool": "db.drop",
+        "estimated": "$0.00"
+      },
+      "seq": 11,
+      "prevHash": "d4ff8e72de5d14338b36e7e5682f30eed30e4270e09fc04ca273b8d8be9f6434",
+      "hash": "2b639ab94e86fc3ac4343d11fd88a9a403b35c42a03fd0abfe69fd8e062762c7"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0005",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "destructive"
+      },
+      "seq": 12,
+      "prevHash": "2b639ab94e86fc3ac4343d11fd88a9a403b35c42a03fd0abfe69fd8e062762c7",
+      "hash": "07fcf8844b56926ef331adf93faa75e61c3f3917e2131f3c847b559617c3c011"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "rogue-agent",
+      "proposalId": "act_0006",
+      "detail": {
+        "tool": "crypto.transfer",
+        "estimated": "$0.00"
+      },
+      "seq": 13,
+      "prevHash": "07fcf8844b56926ef331adf93faa75e61c3f3917e2131f3c847b559617c3c011",
+      "hash": "78d859e981f9999e972ca82e30cb53db6f7410cadad62e66059c12e38f2c1d8b"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0006",
+      "detail": {
+        "verdict": "DENY",
+        "tier": 3,
+        "decidedBy": "unknown-tool"
+      },
+      "seq": 14,
+      "prevHash": "78d859e981f9999e972ca82e30cb53db6f7410cadad62e66059c12e38f2c1d8b",
+      "hash": "7a2c7e038a2e0ae4dcabf66c52dd11e38312541e3c40dddb9c21403f4dafd157"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "BLOCKED",
+      "actor": "policy-engine",
+      "proposalId": "act_0006",
+      "detail": {
+        "why": "\"crypto.transfer\" is not a tool this agent is allowed to call."
+      },
+      "seq": 15,
+      "prevHash": "7a2c7e038a2e0ae4dcabf66c52dd11e38312541e3c40dddb9c21403f4dafd157",
+      "hash": "adb33477d1a3dcfe42b34d33479a4dea5a4c4b21f3f7475e129a8e23bcd4ef23"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "billing-agent",
+      "proposalId": "act_0007",
+      "detail": {
+        "tool": "refund.create",
+        "estimated": "$200.00"
+      },
+      "seq": 16,
+      "prevHash": "adb33477d1a3dcfe42b34d33479a4dea5a4c4b21f3f7475e129a8e23bcd4ef23",
+      "hash": "27a8538ba0d934683a31080784e3f979726f8580bffe5132a5dc40a2cb04c700"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0007",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "large-single-spend"
+      },
+      "seq": 17,
+      "prevHash": "27a8538ba0d934683a31080784e3f979726f8580bffe5132a5dc40a2cb04c700",
+      "hash": "5de0c0c7e66213cf522516970cb321f1d18d37f23812c99372ff57acfd7d9146"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "APPROVED",
+      "actor": "you@company.com",
+      "proposalId": "act_0007",
+      "detail": {
+        "note": "ok"
+      },
+      "seq": 18,
+      "prevHash": "5de0c0c7e66213cf522516970cb321f1d18d37f23812c99372ff57acfd7d9146",
+      "hash": "9efc7fa3e8cfb1d8f5742aaa3b9331d9939e98026d6317ffc154b081fe52077f"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "EXECUTED",
+      "actor": "runtime",
+      "proposalId": "act_0007",
+      "detail": {
+        "tool": "refund.create",
+        "cost": "$200.00"
+      },
+      "seq": 19,
+      "prevHash": "9efc7fa3e8cfb1d8f5742aaa3b9331d9939e98026d6317ffc154b081fe52077f",
+      "hash": "1122dc49aee278acd73923eedeb3ddad5fff1085fe9af88bf6e9576aafaf65fe"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "billing-agent",
+      "proposalId": "act_0008",
+      "detail": {
+        "tool": "refund.create",
+        "estimated": "$10.00"
+      },
+      "seq": 20,
+      "prevHash": "1122dc49aee278acd73923eedeb3ddad5fff1085fe9af88bf6e9576aafaf65fe",
+      "hash": "4ce638eaec2ce86bd03e1e83071aec1159d5d0b855e1ec19e553adaafa30ad23"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0008",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "money-movement"
+      },
+      "seq": 21,
+      "prevHash": "4ce638eaec2ce86bd03e1e83071aec1159d5d0b855e1ec19e553adaafa30ad23",
+      "hash": "1d2b2a1ae5c4195490055dc7508f8aab13e3048630bc5526fcf1651819215368"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "REJECTED",
+      "actor": "you@company.com",
+      "proposalId": "act_0008",
+      "detail": {
+        "note": null
+      },
+      "seq": 22,
+      "prevHash": "1d2b2a1ae5c4195490055dc7508f8aab13e3048630bc5526fcf1651819215368",
+      "hash": "851e1345b2b12ccd2ebc13d94157f026bd8cad7c9a953df8393ded8cd8136c35"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "PROPOSED",
+      "actor": "billing-agent",
+      "proposalId": "act_0009",
+      "detail": {
+        "tool": "refund.create",
+        "estimated": "$5.00"
+      },
+      "seq": 23,
+      "prevHash": "851e1345b2b12ccd2ebc13d94157f026bd8cad7c9a953df8393ded8cd8136c35",
+      "hash": "4774a300ea060eaa955cd9d329d3a2d80784489eec8f7dab2fc0836f509bd0d2"
+    },
+    {
+      "at": "2026-10-26T02:17:00.000Z",
+      "event": "POLICY_EVALUATED",
+      "actor": "policy-engine",
+      "proposalId": "act_0009",
+      "detail": {
+        "verdict": "REQUIRE_APPROVAL",
+        "tier": 3,
+        "decidedBy": "money-movement"
+      },
+      "seq": 24,
+      "prevHash": "4774a300ea060eaa955cd9d329d3a2d80784489eec8f7dab2fc0836f509bd0d2",
+      "hash": "b4cc9791864f13aebd9ac8765df76b72ddec079037f6387e48752acfd61edd0f"
+    },
+    {
+      "at": "2026-10-27T03:00:00.000Z",
+      "event": "BLOCKED",
+      "actor": "policy-engine",
+      "proposalId": "act_0009",
+      "detail": {
+        "why": "This request expired: it was made 24h ago, and an approval only counts within 24h. Ask the agent to propose it again.",
+        "reviewer": "you@company.com"
+      },
+      "seq": 25,
+      "prevHash": "b4cc9791864f13aebd9ac8765df76b72ddec079037f6387e48752acfd61edd0f",
+      "hash": "6731184974f4b458e2d41cf5bd0af378eda98ecbfb0222202c8a9086580788ae"
+    }
+  ],
+  "tokens": {
+    "act_0007": "40c594f4e86403f82163106e4009e26aeab80a4d4442e4ba562752d811ab1e19",
+    "act_0001": "687dd1cb5ea855b383500a9e79c24b83397d05d916721021ec8f7477077c87fd"
+  },
+  "budget": {
+    "spentCents": 20000,
+    "limitCents": 50000
+  },
+  "states": [
+    [
+      "act_0009",
+      "BLOCKED",
+      "approval-expired"
+    ],
+    [
+      "act_0008",
+      "REJECTED",
+      "money-movement"
+    ],
+    [
+      "act_0007",
+      "EXECUTED",
+      "large-single-spend"
+    ],
+    [
+      "act_0006",
+      "BLOCKED",
+      "unknown-tool"
+    ],
+    [
+      "act_0005",
+      "PENDING_APPROVAL",
+      "destructive"
+    ],
+    [
+      "act_0004",
+      "PENDING_APPROVAL",
+      "customer-contact"
+    ],
+    [
+      "act_0003",
+      "PENDING_APPROVAL",
+      "money-movement"
+    ],
+    [
+      "act_0002",
+      "EXECUTED",
+      "internal-write"
+    ],
+    [
+      "act_0001",
+      "EXECUTED",
+      "read-only"
+    ]
+  ]
+}

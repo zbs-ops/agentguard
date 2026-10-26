@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 167 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 194 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard
@@ -32,6 +32,23 @@ print(d.reason)   # "The agent estimated $1.00, but the arguments move $90.00 �
 ```
 
 Seven ordered checks, each one asserted by a test: a malformed tool name is refused before it can borrow another rule, an unknown tool fails closed, a negative or non-finite cost is refused before the budget math, the budget is checked before the tier, an understated or unusually large spend is escalated, and a runaway loop of writes is paused.
+
+`evaluate` judges one call. `Governor` runs the whole approval workflow around it: it holds what's waiting for a person, checks who is approving, charges the budget only when something actually runs, and writes every step to a hash-chained ledger.
+
+```python
+from agentguard.gate import Governor
+
+g = Governor(reviewer_keys={"you@company.com": "your-secret"})
+a = g.propose("billing-agent", "refund.create", {"amount_cents": 9000}, estimated_cost_cents=9000)
+print(a.state.value)                     # PENDING_APPROVAL
+
+token = g.mint_token(a.id, "you@company.com")   # only the key holder can make this
+g.decide(a.id, True, "you@company.com", token=token)
+print(a.state.value, g.spent_cents)     # EXECUTED 9000
+print(g.verify().message)               # All 4 entries verify against their hashes.
+```
+
+Each rule here is a bug the TypeScript project found and fixed: the agent that asked can't approve its own request; typing a reviewer's name isn't enough, it takes a token bound to that one action; an approval stops counting 24 hours after the request; and the budget is checked again at the moment an approved action runs, because two refunds that each fit alone can both get a yes. Ledgers are interchangeable with the TypeScript version: the same calls produce the same ledger byte for byte, hashes included (`tests/test_governor.py` checks this against a ledger the TypeScript store wrote).
 
 ### 2. A provenance checker: catch invented facts
 
@@ -108,6 +125,7 @@ agentguard check run.json            # OpenAI, Anthropic or agentguard format; e
 agentguard check run.json --ids-only # only high-confidence invented IDs
 agentguard gate refund.create --cost 9000 --amount 9000
 agentguard bench                     # the shell-gate scorecard
+agentguard verify-ledger ledger.json # exit 1 and name the first edited entry
 ```
 
 `agentguard check` exits non-zero when a transcript is flagged, so it can gate a CI job over saved agent runs.
@@ -120,7 +138,7 @@ The checker and the benchmark are Python ports of two projects I tested on real 
 
 - **[tool-truth](https://github.com/zbs-ops/tool-truth)**: the checker, run on 660+ real agent conversations from τ-bench and τ²-bench. The first version was useless on real logs; after fixes it caught agents inventing an order number a customer then relied on. Held-out results, good and bad, are written up in full.
 - **[gate-bypass-bench](https://github.com/zbs-ops/gate-bypass-bench)**: the benchmark, which I ran against the real command rules of Google's Gemini CLI, OpenAI's Codex CLI, and opencode. Their deny rules were bypassed 78–84% of the time; the same engines as allowlists held at 0%.
-- **[agent-governance](https://github.com/zbs-ops/agent-governance)**: the gate, with a live demo and a tamper-evident audit log.
+- **[agent-governance](https://github.com/zbs-ops/agent-governance)**: the gate and the approval workflow, with a live demo and a tamper-evident audit log.
 
 Background: Chen & Lin, *denylist fragility in AI agents* ([arXiv:2606.15549](https://arxiv.org/abs/2606.15549)); Sethi et al., *fabrication after tool failure* ([arXiv:2609.14758](https://arxiv.org/abs/2609.14758)); Saltzer & Schroeder (1975) on fail-safe defaults.
 
@@ -128,6 +146,7 @@ Background: Chen & Lin, *denylist fragility in AI agents* ([arXiv:2606.15549](ht
 
 - **No model, by design.** The checker uses exact-match provenance. It catches invented concrete values; it cannot judge paraphrase or multi-step arithmetic, and the TypeScript write-ups measure that boundary on real data.
 - **The gate's policy is a sensible default, not your policy.** The tiers and the $500 cap are the demo's; the point is the shape.
+- **The Governor keeps state in memory.** Save `g.ledger()` (each entry has `to_dict()`) wherever you keep records; `verify-ledger` checks it later. Reviewer keys are plain secrets you hand it; in production they belong behind your identity provider.
 - **The benchmark runs POSIX `sh`.** The rewrites re-spell dangerous-shaped commands; they only touch files inside a per-case sandbox.
 
 ## How I build

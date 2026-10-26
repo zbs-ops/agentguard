@@ -3,11 +3,13 @@
 Every tool call is a *proposal*. ``evaluate`` returns one of three verdicts: run it, hold it
 for a person, or refuse it. The gate is a pure function of the proposal, the budget, and a
 small history object, so the same inputs always give the same verdict, which is what makes it
-testable. Ported from the TypeScript ``agent-governance`` project.
+testable. Ported from the TypeScript ``agent-governance`` project; the reason strings match it
+word for word, because they end up in ledger entries whose hashes must agree across the two.
 """
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from dataclasses import dataclass
@@ -150,22 +152,22 @@ def evaluate(
     # 0. A tool name has to look like a tool name before it is matched. Wildcards match by
     #    prefix, so without this a name like "search.x/../refund.create" would ride "search.*".
     if not _TOOL_NAME.fullmatch(tool):
-        return Decision(Verdict.DENY, 3, (f"{tool!r} is not a well-formed tool name.",), "malformed-tool", 0)
+        return Decision(Verdict.DENY, 3, (f"{json.dumps(tool, ensure_ascii=False)} is not a well-formed tool name.",), "malformed-tool", 0)
 
     # 1. Unknown tools fail closed.
     rule = _rule_for(tool)
     if rule is None:
-        return Decision(Verdict.DENY, 3, (f"{tool!r} is not a tool this agent is allowed to call.",), "unknown-tool", 0)
+        return Decision(Verdict.DENY, 3, (f'"{tool}" is not a tool this agent is allowed to call.',), "unknown-tool", 0)
     reasons.append(rule.describe)
 
     # 2. Both numbers must be ones the math can trust: the estimate and any amount the
     #    arguments move. A negative or NaN cost would slip past the cap.
     if not _is_cents(estimated_cost_cents):
-        reasons.append(f"An estimated cost of {estimated_cost_cents} is not a whole, non-negative amount.")
+        reasons.append(f"An estimated cost of {estimated_cost_cents} cents is not a whole, non-negative amount.")
         return Decision(Verdict.DENY, rule.tier, tuple(reasons), "malformed-cost", 0)
     arg_amount = args.get("amount_cents")
     if arg_amount is not None and not _is_cents(arg_amount):
-        reasons.append(f"The arguments ask to move {arg_amount}, which is not a whole, non-negative amount.")
+        reasons.append(f"The arguments ask to move {arg_amount} cents, which is not a whole, non-negative amount.")
         return Decision(Verdict.DENY, rule.tier, tuple(reasons), "malformed-cost", 0)
 
     # The estimate is the agent's word; amount_cents is what the call will do. Charge the

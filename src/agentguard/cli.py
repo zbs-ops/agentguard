@@ -6,6 +6,8 @@
 - ``agentguard gate <tool> [--cost C] [--amount A] [--limit L] [--spent S]``: ask the policy
   gate what it would do with a proposed tool call.
 - ``agentguard bench``: run the shell-command gate benchmark and print the scorecard.
+- ``agentguard verify-ledger <ledger.json>``: recompute every hash in an approval ledger and
+  name the first entry that was edited, cut or reordered. Exit code 1 if it doesn't verify.
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ import json
 import sys
 from collections.abc import Sequence
 
-from agentguard.gate import Budget, evaluate
+from agentguard.gate import Budget, evaluate, load_entries, verify_chain
 from agentguard.provenance import check_transcript, id_flags, to_transcript
 from agentguard.shell import format_report, run_bench
 
@@ -55,6 +57,18 @@ def _cmd_bench(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_verify_ledger(args: argparse.Namespace) -> int:
+    with open(args.ledger, encoding="utf-8") as fh:
+        try:
+            chain = load_entries(json.load(fh))
+        except ValueError as exc:
+            print(f"not a ledger: {exc}")
+            return 2
+    result = verify_chain(chain)
+    print(("valid: " if result.valid else "BROKEN: ") + result.message)
+    return 0 if result.valid else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="agentguard", description="Guardrails and evals for AI agents.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -74,6 +88,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     p_bench = sub.add_parser("bench", help="run the shell-command gate benchmark")
     p_bench.set_defaults(func=_cmd_bench)
+
+    p_ledger = sub.add_parser("verify-ledger", help="check an approval ledger for tampering")
+    p_ledger.add_argument("ledger", help="path to a ledger JSON file (a list, or an object with 'chain')")
+    p_ledger.set_defaults(func=_cmd_verify_ledger)
 
     args = parser.parse_args(argv)
     return int(args.func(args))
