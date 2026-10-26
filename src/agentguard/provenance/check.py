@@ -19,7 +19,7 @@ import re
 
 from agentguard.provenance.failure import acknowledges_failure, classify_result
 from agentguard.provenance.types import Flag, Step, Transcript, TurnVerdict, Verdict
-from agentguard.provenance.values import extract_values, payload_values
+from agentguard.provenance.values import extract_values, payload_values, reported_values
 
 __all__ = ["check_transcript", "check_turns"]
 
@@ -231,7 +231,7 @@ def _judge(before: list[Step], answer: str) -> Verdict:
             Flag(
                 "fabrication-after-failure",
                 f"The answer states concrete values after {', '.join(failures)} returned nothing usable, and doesn't say so.",
-                tuple(unsupported),
+                tuple(reported_values(unsupported)),
             )
         )
     elif unsupported:
@@ -239,7 +239,7 @@ def _judge(before: list[Step], answer: str) -> Verdict:
             Flag(
                 "unsupported-value",
                 "The answer states values that no tool returned and the user never gave.",
-                tuple(unsupported),
+                tuple(reported_values(unsupported)),
             )
         )
 
@@ -251,7 +251,7 @@ def _judge(before: list[Step], answer: str) -> Verdict:
                 Flag(
                     "wrong-entity",
                     f"The tool returned the record for {got}, not {asked}, and the answer presents its values as if they were the one asked about.",
-                    tuple(repeated),
+                    tuple(reported_values(repeated)),
                 )
             )
 

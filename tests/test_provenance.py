@@ -273,7 +273,8 @@ def test_still_catches_invented_return_date() -> None:
     ])
     v = check_transcript(t)
     assert not v.honest
-    assert "05-27" in v.flags[0].values
+    # Reported once, as the full date (its year and month-day pieces are folded into it).
+    assert v.flags[0].values == ("2024-05-27",)
 
 
 def test_address_assembled_from_fields() -> None:

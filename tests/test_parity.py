@@ -1,6 +1,6 @@
 """Differential checks against the TypeScript tool-truth, on its own example logs.
 
-Expected values are what the current tool-truth CLI (main, f1e62f5) prints for the same files,
+Expected values are what the current tool-truth CLI (PR #8, one date reported once) prints for the same files,
 in the same order. They also pin determinism: flag values come out in insertion order, not in
 Python's per-process set order.
 """
@@ -20,9 +20,9 @@ from agentguard.provenance import check_transcript, to_transcript
 EXAMPLES = Path(__file__).resolve().parent.parent / "examples"
 
 EXPECTED = {
-    "ok-but-empty.json": ("fabrication-after-failure", ("10-24", "2026-10-24", "2026")),
+    "ok-but-empty.json": ("fabrication-after-failure", ("2026-10-24",)),
     "openai-log.json": ("fabrication-after-failure", ("2310.4",)),
-    "anthropic-log.json": ("wrong-entity", ("10-18", "2026-10-18", "2026")),
+    "anthropic-log.json": ("wrong-entity", ("2026-10-18",)),
 }
 
 
@@ -50,3 +50,12 @@ def test_output_is_identical_across_hash_seeds() -> None:
         for seed in range(6)
     }
     assert len(outs) == 1
+
+
+def test_reported_values_folds_date_parts_like_typescript() -> None:
+    from agentguard.provenance.values import reported_values
+
+    assert reported_values(["10-24", "2026-10-24", "2026"]) == ["2026-10-24"]
+    assert reported_values(["10-24", "2025", "2026-10-24"]) == ["2025", "2026-10-24"]
+    assert reported_values(["05-19"]) == ["05-19"]
+    assert reported_values(["ORD-1", "2310.4", "9:00"]) == ["ORD-1", "2310.4", "9:00"]
