@@ -7,8 +7,10 @@
 > **Proof:** 194 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
-pip install agentguard
+pip install agentguard-eval
 ```
+
+The package installs as `agentguard-eval` (PyPI found `agentguard` too close to an existing name) and imports as `agentguard`.
 
 Python 3.10+. Zero runtime dependencies. Everything here runs offline and gives the same answer every time, which is what makes it testable and what makes it safe to put in a CI job.
 

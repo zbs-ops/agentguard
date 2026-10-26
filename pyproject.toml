@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentguard"
+name = "agentguard-eval"
 version = "0.3.0"
 description = "Guardrails and evals for AI agents: a policy gate for tool calls, a checker for invented facts, and a benchmark for shell-command gates. Deterministic, no API keys."
 readme = "README.md"
