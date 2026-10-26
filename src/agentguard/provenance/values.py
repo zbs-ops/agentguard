@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 import re
 
-__all__ = ["extract_values", "is_id_shaped", "normalize_number", "payload_values"]
+__all__ = ["extract_values", "is_id_shaped", "normalize_number", "payload_values", "reported_values"]
 
 _MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 _MONTHS = (
@@ -67,6 +67,25 @@ def _is_trivial(n: str) -> bool:
 
 def _month_number(name: str) -> str:
     return str(_MONTH_NAMES.index(name[:3].lower()) + 1).zfill(2)
+
+
+_FULL_DATE = re.compile(r"(\d{4})-(\d{2}-\d{2})")
+
+
+def reported_values(values: list[str]) -> list[str]:
+    """The values a flag should show a person.
+
+    A date is matched as three tokens (``2026-10-24``, ``10-24``, ``2026``) so a written-out
+    date can meet an ISO one, but reporting all three makes one invented date look like three.
+    A year or month-day that is part of a full date in the same list is dropped; everything
+    else is kept, in order. Mirrors tool-truth's ``reportedValues``.
+    """
+    parts: set[str] = set()
+    for v in values:
+        m = _FULL_DATE.fullmatch(v)
+        if m:
+            parts.update(m.groups())
+    return [v for v in values if v not in parts]
 
 
 def _add_date(found: dict[str, None], year: str | None, month: str, day: str) -> None:
