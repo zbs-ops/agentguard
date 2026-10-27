@@ -132,11 +132,13 @@ def verify_chain(chain: Iterable[Entry]) -> ChainVerification:
 
 
 def load_entries(data: Any) -> list[Entry]:
-    """Read a ledger from parsed JSON: a list of entries, or an object with a ``chain`` list."""
+    """Read a ledger from parsed JSON: a list of entries, or an object holding one under ``chain``
+    or ``entries`` (what agent-governance's ``GET /api/audit`` returns, so a saved response verifies
+    as-is)."""
     if isinstance(data, Mapping):
-        data = data.get("chain")
+        data = data.get("chain", data.get("entries"))
     if not isinstance(data, list):
-        raise ValueError("a ledger is a JSON list of entries (or an object with a 'chain' list)")
+        raise ValueError("a ledger is a JSON list of entries (or an object with a 'chain' or 'entries' list)")
     try:
         return [Entry.from_dict(item) for item in data]
     except (KeyError, TypeError) as exc:

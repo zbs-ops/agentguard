@@ -90,7 +90,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     p_bench.set_defaults(func=_cmd_bench)
 
     p_ledger = sub.add_parser("verify-ledger", help="check an approval ledger for tampering")
-    p_ledger.add_argument("ledger", help="path to a ledger JSON file (a list, or an object with 'chain')")
+    p_ledger.add_argument("ledger", help="path to a ledger JSON file (a list, or an object with 'chain' or 'entries')")
     p_ledger.set_defaults(func=_cmd_verify_ledger)
 
     args = parser.parse_args(argv)

@@ -132,6 +132,15 @@ agentguard verify-ledger ledger.json # exit 1 and name the first edited entry
 
 `agentguard check` exits non-zero when a transcript is flagged, so it can gate a CI job over saved agent runs.
 
+`verify-ledger` reads the [agent-governance live demo](https://agent-governance-theta.vercel.app)'s audit log as-is, so you can check a server's log without trusting the server:
+
+```bash
+curl -s https://agent-governance-theta.vercel.app/api/audit > audit.json
+agentguard verify-ledger audit.json   # valid: All 15 entries verify against their hashes.
+```
+
+Hit "Tamper with it" on the demo first and it names the same broken entry the demo's own verifier does.
+
 ---
 
 ## Where this comes from
