@@ -337,3 +337,20 @@ def test_cli_verify_ledger(tmp_path, capsys):
     junk = tmp_path / "junk.json"
     junk.write_text('{"nope": 1}', encoding="utf-8")
     assert main(["verify-ledger", str(junk)]) == 2
+
+
+def test_reads_the_live_demo_audit_api_shape():
+    # agent-governance's GET /api/audit answers {"entries": [...]}; that file should verify as-is.
+    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    chain = load_entries({"entries": data["chain"]})
+    assert len(chain) == 25 and verify_chain(chain).valid
+
+
+def test_cli_verifies_a_saved_audit_api_response(tmp_path, capsys):
+    from agentguard.cli import main
+
+    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    saved = tmp_path / "audit.json"
+    saved.write_text(json.dumps({"entries": data["chain"]}), encoding="utf-8")
+    assert main(["verify-ledger", str(saved)]) == 0
+    assert "All 25 entries verify" in capsys.readouterr().out
