@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
+import math
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
@@ -36,6 +38,7 @@ __all__ = [
     "SelfApprovalError",
     "State",
     "mint_approval_token",
+    "proposal_digest",
     "verify_approval_token",
 ]
 
@@ -61,6 +64,55 @@ class ApprovalAuthError(Exception):
 
 def _norm(name: str) -> str:
     return name.strip().lower()
+
+
+def _js_number(v: float) -> str:
+    """A float the way JavaScript's JSON.stringify writes it."""
+    if not math.isfinite(v):
+        return "null"
+    if v == int(v) and abs(v) < 1e21:
+        return str(int(v))  # 1.0 -> "1", -0.0 -> "0"
+    text = repr(v)
+    if "e" in text:
+        mantissa, exp = text.split("e")
+        sign = "-" if exp.startswith("-") else "+"
+        text = f"{mantissa}e{sign}{exp.lstrip('+-').lstrip('0') or '0'}"
+    return text
+
+
+def _canonical(value: Any) -> str:
+    """JSON with object keys sorted at every level: the same bytes as the TypeScript ``canonical``."""
+    if value is None or isinstance(value, bool):
+        return json.dumps(value)
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        return _js_number(value)
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, (list, tuple)):
+        return "[" + ",".join(_canonical(x) for x in value) + "]"
+    if isinstance(value, Mapping):
+        # JavaScript sorts keys by UTF-16 code units, so sort the same way.
+        keys = sorted((str(k) for k in value), key=lambda k: k.encode("utf-16-be"))
+        return "{" + ",".join(f"{json.dumps(k, ensure_ascii=False)}:{_canonical(value[k])}" for k in keys) + "}"
+    raise TypeError(f"can't fingerprint a {type(value).__name__}")
+
+
+def proposal_digest(
+    proposal_id: str, agent: str, tool: str, args: Mapping[str, Any], estimated_cost_cents: int, created_at: str
+) -> str:
+    """A fingerprint of everything an approval is an approval OF. Same hex as agent-governance's
+    ``proposalDigest``. ``created_at`` is the ISO-8601 time the action was proposed."""
+    body = {
+        "id": proposal_id,
+        "agent": agent,
+        "tool": tool,
+        "args": args,
+        "estimatedCostCents": estimated_cost_cents,
+        "createdAt": created_at,
+    }
+    return hashlib.sha256(_canonical(body).encode()).hexdigest()
 
 
 def mint_approval_token(key: str, proposal_id: str, reviewer: str) -> str:
