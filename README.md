@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 194 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 206 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -50,7 +50,7 @@ print(a.state.value, g.spent_cents)     # EXECUTED 9000
 print(g.verify().message)               # All 4 entries verify against their hashes.
 ```
 
-Each rule here is a bug the TypeScript project found and fixed: the agent that asked can't approve its own request; typing a reviewer's name isn't enough, it takes a token bound to that one action; an approval stops counting 24 hours after the request; and the budget is checked again at the moment an approved action runs, because two refunds that each fit alone can both get a yes. Ledgers are interchangeable with the TypeScript version: the same calls produce the same ledger byte for byte, hashes included (`tests/test_governor.py` checks this against a ledger the TypeScript store wrote).
+Each rule here is a bug the TypeScript project found and fixed: the agent that asked can't approve its own request; typing a reviewer's name isn't enough, it takes a token bound to that one action's contents (ids restart with every new Governor, so a token bound to `act_0001` alone once approved a different, bigger `act_0001`); an approval stops counting 24 hours after the request; and the budget is checked again at the moment an approved action runs, because two refunds that each fit alone can both get a yes. Ledgers are interchangeable with the TypeScript version: the same calls produce the same ledger byte for byte, hashes included (`tests/test_governor.py` checks this against a ledger the TypeScript store wrote).
 
 ### 2. A provenance checker: catch invented facts
 
