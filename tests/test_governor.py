@@ -317,13 +317,6 @@ def test_the_same_calls_produce_the_same_ledger_byte_for_byte():
     assert [[a.id, a.state.value, a.decision.decided_by] for a in reversed(g.actions())] == data["states"]
 
 
-def test_approval_tokens_match_the_typescript_hmac():
-    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    key = KEYS[HUMAN]
-    assert mint_approval_token(key, "act_0007", HUMAN) == data["tokens"]["act_0007"]
-    assert mint_approval_token(key, "act_0001", " You@Company.com ") == data["tokens"]["act_0001"]
-
-
 # Reference values printed by agent-governance's proposalDigest / mintApprovalToken (PR #10).
 TS_REFERENCE = [
     (
@@ -343,8 +336,47 @@ TS_REFERENCE = [
 
 
 @pytest.mark.parametrize(("proposal", "digest", "token"), TS_REFERENCE)
-def test_digest_matches_the_typescript_bytes(proposal, digest, token):
+def test_digest_and_token_match_the_typescript_bytes(proposal, digest, token):
     assert proposal_digest(*proposal) == digest
+    assert mint_approval_token(KEYS[HUMAN], proposal[0], HUMAN, digest=digest) == token
+    assert mint_approval_token(KEYS[HUMAN], proposal[0], " You@Company.com ", digest=digest) == token
+
+
+def test_a_token_does_not_carry_over_to_a_new_action_with_the_same_id():
+    # Ids are a counter, so a fresh Governor (a restart) hands out act_0001 again.
+    first, _ = governor()
+    small = refund(first, 2_000, tool="stripe.refund")
+    old_token = first.mint_token(small.id, HUMAN)
+
+    second, _ = governor()
+    big = second.propose("billing-agent", "stripe.refund", {"amount_cents": 40_000, "customer": "someone-else"},
+                         estimated_cost_cents=40_000)
+    assert big.id == small.id
+    with pytest.raises(ApprovalAuthError):
+        second.decide(big.id, True, HUMAN, token=old_token)
+    assert second.spent_cents == 0
+    assert second.get(big.id).state is State.PENDING_APPROVAL
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"args": {"amount_cents": 2_001}},
+        {"args": {"amount_cents": 2_000, "note": "and the rest"}},
+        {"tool": "stripe.payout"},
+        {"agent": "other-agent"},
+        {"estimated_cost_cents": 1},
+        {"created_at": 1_793_000_001.0},
+    ],
+)
+def test_a_token_is_refused_if_anything_it_covered_changed(change):
+    g, _ = governor()
+    a = refund(g, 2_000, tool="stripe.refund")
+    token = g.mint_token(a.id, HUMAN)
+    for k, v in change.items():
+        setattr(a, k, v)
+    with pytest.raises(ApprovalAuthError):
+        g.decide(a.id, True, HUMAN, token=token)
 
 
 def test_argument_order_does_not_change_the_digest():
