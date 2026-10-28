@@ -19,6 +19,7 @@ from agentguard.gate import (
     SelfApprovalError,
     State,
     mint_approval_token,
+    proposal_digest,
 )
 from agentguard.gate.ledger import Entry, load_entries, verify_chain
 
@@ -321,6 +322,35 @@ def test_approval_tokens_match_the_typescript_hmac():
     key = KEYS[HUMAN]
     assert mint_approval_token(key, "act_0007", HUMAN) == data["tokens"]["act_0007"]
     assert mint_approval_token(key, "act_0001", " You@Company.com ") == data["tokens"]["act_0001"]
+
+
+# Reference values printed by agent-governance's proposalDigest / mintApprovalToken (PR #10).
+TS_REFERENCE = [
+    (
+        ("act_0001", "billing-agent", "stripe.refund", {"customer": "acme", "amount_cents": 500}, 500,
+         "2026-10-28T05:00:00.000Z"),
+        "e977ac4bbc68be50d51fed5b8ee0e4355a940626f71ad09f7e1bd7e9e9f9bb1f",
+        "e84399c9cb692b2496ba9605b7487ba83883d43cc1f40b3c984e1e63715b8ddd",
+    ),
+    (
+        ("act_0042", "ops", "crm.update",
+         {"z": [1, 2.5, True, None], "a": {"\u00fc": 'caf\u00e9 "x"\n', "n": 1.0, "k": -0.0}}, 0,
+         "2026-10-28T05:00:00.123Z"),
+        "de5a8e0b80e945ab6a123f9107df81a874ce71a69913ea3dc08efd8990aaf21e",
+        "b17d53dfbfa446262249003512b4c592cbdf058fdd68ab0ff15ba817e3514d31",
+    ),
+]
+
+
+@pytest.mark.parametrize(("proposal", "digest", "token"), TS_REFERENCE)
+def test_digest_matches_the_typescript_bytes(proposal, digest, token):
+    assert proposal_digest(*proposal) == digest
+
+
+def test_argument_order_does_not_change_the_digest():
+    one = proposal_digest("act_0001", "a", "t", {"x": 1, "y": {"b": 2, "a": 1}}, 0, "2026-10-28T05:00:00.000Z")
+    two = proposal_digest("act_0001", "a", "t", {"y": {"a": 1, "b": 2}, "x": 1}, 0, "2026-10-28T05:00:00.000Z")
+    assert one == two
 
 
 def test_cli_verify_ledger(tmp_path, capsys):

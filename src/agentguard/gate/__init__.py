@@ -10,6 +10,7 @@ from agentguard.gate.governor import (
     SelfApprovalError,
     State,
     mint_approval_token,
+    proposal_digest,
     verify_approval_token,
 )
 from agentguard.gate.ledger import ChainVerification, Entry, load_entries, verify_chain
@@ -45,6 +46,7 @@ __all__ = [
     "load_entries",
     "mint_approval_token",
     "money",
+    "proposal_digest",
     "verify_approval_token",
     "verify_chain",
 ]
