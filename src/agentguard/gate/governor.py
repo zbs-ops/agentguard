@@ -7,7 +7,8 @@ when something actually runs, and writes every step to a tamper-evident ledger.
 The rules carried over from ``agent-governance``, each one a bug that project fixed:
 
 - The agent that proposed an action can't approve it.
-- An approval needs a token only the named reviewer's key can make, bound to that action.
+- An approval needs a token only the named reviewer's key can make, bound to that action's
+  contents, not just its id (ids restart with every new Governor).
 - An approval only counts for 24 hours after the request (configurable).
 - The budget is checked again at the moment an approved action would run, because other
   actions may have spent while it waited.
@@ -115,19 +116,23 @@ def proposal_digest(
     return hashlib.sha256(_canonical(body).encode()).hexdigest()
 
 
-def mint_approval_token(key: str, proposal_id: str, reviewer: str) -> str:
-    """HMAC that binds one reviewer to one proposal. Same bytes as the TypeScript version."""
-    message = f"{proposal_id}:{_norm(reviewer)}".encode()
+def mint_approval_token(key: str, proposal_id: str, reviewer: str, *, digest: str) -> str:
+    """HMAC that binds one reviewer to one proposal's id AND contents. Same bytes as the
+    TypeScript version. The digest matters: ids are a counter that restarts, so a token bound
+    to the id alone used to approve a different action that got the same id later."""
+    message = f"{proposal_id}:{digest}:{_norm(reviewer)}".encode()
     return hmac.new(key.encode(), message, hashlib.sha256).hexdigest()
 
 
-def verify_approval_token(keys: Mapping[str, str], proposal_id: str, reviewer: str, token: str | None) -> bool:
+def verify_approval_token(
+    keys: Mapping[str, str], proposal_id: str, reviewer: str, token: str | None, *, digest: str
+) -> bool:
     if token is None:
         return False
     key = {_norm(k): v for k, v in keys.items()}.get(_norm(reviewer))
     if key is None:
         return False
-    return hmac.compare_digest(mint_approval_token(key, proposal_id, reviewer), token)
+    return hmac.compare_digest(mint_approval_token(key, proposal_id, reviewer, digest=digest), token)
 
 
 @dataclass
@@ -142,6 +147,12 @@ class GatedAction:
     state: State
     reviewed_by: str | None = None
     review_note: str | None = None
+
+
+def _digest_of(action: GatedAction) -> str:
+    return proposal_digest(
+        action.id, action.agent, action.tool, action.args, action.estimated_cost_cents, _iso(action.created_at)
+    )
 
 
 def _iso(ts: float) -> str:
@@ -186,11 +197,15 @@ class Governor:
         return verify_chain(self._ledger)
 
     def mint_token(self, action_id: str, reviewer: str) -> str:
-        """A token for a reviewer whose key this governor holds (what your UI would call)."""
+        """A token for a reviewer whose key this governor holds (what your UI would call).
+        It covers the action as it stands now, so it approves nothing else."""
         key = {_norm(k): v for k, v in self.reviewer_keys.items()}.get(_norm(reviewer))
         if key is None:
             raise ApprovalAuthError(f"{reviewer!r} is not a registered reviewer.")
-        return mint_approval_token(key, action_id, reviewer)
+        action = self.get(action_id)
+        if action is None:
+            raise KeyError(f"no action {action_id!r}")
+        return mint_approval_token(key, action_id, reviewer, digest=_digest_of(action))
 
     # -- the workflow ----------------------------------------------------------------------
     def propose(
@@ -233,7 +248,9 @@ class Governor:
         # Separation of duties, checked before anything is written. Withdrawing your own is fine.
         if approve and _norm(reviewer) == _norm(action.agent):
             raise SelfApprovalError(f"{action.agent!r} proposed this action, so it can't also approve it.")
-        if approve and not verify_approval_token(self.reviewer_keys, action_id, reviewer, token):
+        if approve and not verify_approval_token(
+            self.reviewer_keys, action_id, reviewer, token, digest=_digest_of(action)
+        ):
             raise ApprovalAuthError(f"{reviewer!r} did not present a valid approval token.")
 
         # Only a yes expires: rejecting a stale request is how the queue gets cleared. Checked
