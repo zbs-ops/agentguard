@@ -41,6 +41,13 @@ def test_cli_bench_runs(capsys: pytest.CaptureFixture[str]) -> None:
     assert "allowlist" in capsys.readouterr().out
 
 
+def test_cli_bench_wrappers_runs(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["bench", "--wrappers"]) == 0
+    out = capsys.readouterr().out
+    assert "0/12" in out  # the allowlist stops all 12
+    assert "12/12" in out  # the first-word denylist lets all 12 through
+
+
 def test_fixture_assert_grounded(assert_grounded) -> None:  # type: ignore[no-untyped-def]
     t = {"steps": [
         {"role": "tool_call", "id": "c1", "tool": "o.get", "args": {}},
