@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 206 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 225 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -102,6 +102,8 @@ allowlist                    0%   (0/45)
 ```
 
 Two findings worth the whole module: a more precise denylist is not a safer one (whole-word matching misses `rm${IFS}file` that a dumb substring search catches), and only the allowlist, which names what may run and refuses everything else, holds at 0%.
+
+There's also a wrapper set (`agentguard bench --wrappers`, or `i, m = wrapper_set(); run_bench(intents=i, mutators=m)`): one harmless word in front, like `timeout 5 rm` or `env rm`. The [gate-bypass-bench](https://github.com/zbs-ops/gate-bypass-bench) study found this gets past the real deny rules of Gemini CLI, Codex and opencode 12 times out of 12. A first-word denylist here does the same; the allowlist still holds at 0/12. It's kept separate, so the scorecard above is unchanged.
 
 ---
 
