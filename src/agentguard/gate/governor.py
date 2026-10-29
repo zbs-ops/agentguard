@@ -7,8 +7,9 @@ when something actually runs, and writes every step to a tamper-evident ledger.
 The rules carried over from ``agent-governance``, each one a bug that project fixed:
 
 - The agent that proposed an action can't approve it.
-- An approval needs a token only the named reviewer's key can make, bound to that action's
-  contents, not just its id (ids restart with every new Governor).
+- A decision (approve or reject) needs a token only the named reviewer's key can make, bound
+  to that action's contents, not just its id (ids restart with every new Governor). The agent
+  that asked may withdraw its own request without one.
 - An approval only counts for 24 hours after the request (configurable).
 - The budget is checked again at the moment an approved action would run, because other
   actions may have spent while it waited.
@@ -248,10 +249,14 @@ class Governor:
         # Separation of duties, checked before anything is written. Withdrawing your own is fine.
         if approve and _norm(reviewer) == _norm(action.agent):
             raise SelfApprovalError(f"{action.agent!r} proposed this action, so it can't also approve it.")
-        if approve and not verify_approval_token(
+        # A rejection is authenticated too: otherwise anyone could cancel a pending action and the
+        # ledger would record a person's name against a decision they never made. Only the agent
+        # that asked may withdraw its own request without a token.
+        withdrawing = not approve and _norm(reviewer) == _norm(action.agent)
+        if not withdrawing and not verify_approval_token(
             self.reviewer_keys, action_id, reviewer, token, digest=_digest_of(action)
         ):
-            raise ApprovalAuthError(f"{reviewer!r} did not present a valid approval token.")
+            raise ApprovalAuthError(f"{reviewer!r} did not present a valid token for this decision.")
 
         # Only a yes expires: rejecting a stale request is how the queue gets cleared. Checked
         # after authentication, so a forged attempt can't change anything.

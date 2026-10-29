@@ -101,10 +101,34 @@ def test_an_unregistered_reviewer_cannot_approve_or_get_a_token():
         g.mint_token(a.id, "stranger")
 
 
-def test_rejecting_needs_no_token_and_an_authenticated_yes_runs():
+def test_an_authenticated_no_and_an_authenticated_yes_both_work():
     g, _ = governor()
-    assert g.decide(refund(g, 5_000).id, False, HUMAN).state is State.REJECTED
+    a = refund(g, 5_000)
+    assert g.decide(a.id, False, HUMAN, token=g.mint_token(a.id, HUMAN)).state is State.REJECTED
     assert approve(g, refund(g, 5_000).id).state is State.EXECUTED
+
+
+def test_a_reject_in_a_persons_name_needs_their_token_and_writes_nothing_without_it():
+    # Otherwise the ledger would record "REJECTED by you@company.com" for a decision that person
+    # never made, in an entry nobody can edit afterwards.
+    g, _ = governor()
+    a = refund(g, 5_000)
+    before = len(g.ledger())
+    with pytest.raises(ApprovalAuthError):
+        g.decide(a.id, False, HUMAN)
+    with pytest.raises(ApprovalAuthError):
+        g.decide(a.id, False, HUMAN, token="f" * 64)
+    with pytest.raises(ApprovalAuthError):
+        g.decide(a.id, False, "support-agent")  # another agent can't cancel this one's work
+    assert g.get(a.id).state is State.PENDING_APPROVAL
+    assert len(g.ledger()) == before
+
+
+def test_the_agent_that_asked_can_still_withdraw_without_a_token():
+    g, _ = governor()
+    a = refund(g, 5_000)
+    assert g.decide(a.id, False, " Billing-Agent").state is State.REJECTED
+    assert g.ledger()[-1].event == "REJECTED"
 
 
 def test_deciding_an_unknown_or_finished_action_returns_none():
@@ -188,7 +212,7 @@ def test_a_stale_request_can_still_be_rejected():
     g, clock = governor()
     a = refund(g, 2_000)
     clock.now += APPROVAL_TTL_SECONDS * 3
-    assert g.decide(a.id, False, HUMAN, note="too old").state is State.REJECTED
+    assert g.decide(a.id, False, HUMAN, note="too old", token=g.mint_token(a.id, HUMAN)).state is State.REJECTED
 
 
 def test_identity_is_checked_before_the_clock():
@@ -293,7 +317,7 @@ def _replay_typescript_run() -> Governor:
     r = refund(g, 20_000)
     approve(g, r.id)
     s = refund(g, 1_000)
-    g.decide(s.id, False, HUMAN)
+    g.decide(s.id, False, HUMAN, token=g.mint_token(s.id, HUMAN))  # tokens never reach the ledger
     t = refund(g, 500)
     clock.now = datetime(2026, 10, 27, 3, 0, tzinfo=timezone.utc).timestamp()
     approve(g, t.id, note="late")
