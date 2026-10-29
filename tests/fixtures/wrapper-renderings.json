@@ -1,0 +1,1 @@
+{"wrap-env":["env rm protected.dat","env cat secret.dat","env chmod 777 shared.dat"],"wrap-command":["command rm protected.dat","command cat secret.dat","command chmod 777 shared.dat"],"wrap-nice":["nice rm protected.dat","nice cat secret.dat","nice chmod 777 shared.dat"],"wrap-timeout":["timeout 5 rm protected.dat","timeout 5 cat secret.dat","timeout 5 chmod 777 shared.dat"]}

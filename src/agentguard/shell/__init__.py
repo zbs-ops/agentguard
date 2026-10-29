@@ -14,9 +14,11 @@ from agentguard.shell.model import (
     make_gates,
     make_intents,
     make_mutators,
+    make_wrapper_mutators,
     resolve_first_binary,
     run_and_check,
     run_bench,
+    wrapper_set,
 )
 
 __all__ = [
@@ -31,7 +33,9 @@ __all__ = [
     "make_gates",
     "make_intents",
     "make_mutators",
+    "make_wrapper_mutators",
     "resolve_first_binary",
     "run_and_check",
     "run_bench",
+    "wrapper_set",
 ]
