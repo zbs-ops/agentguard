@@ -1,0 +1,86 @@
+{
+  "tool_truth_version": "0.5.5",
+  "cases": [
+    {
+      "text": "a 15GB monthly limit, you used 8.7GB",
+      "values": [
+        "15",
+        "8.7",
+        "8"
+      ]
+    },
+    {
+      "text": "you have used 8.7GB",
+      "values": [
+        "8.7",
+        "8"
+      ]
+    },
+    {
+      "text": "a 512MB cache and a 250ms timeout",
+      "values": [
+        "512",
+        "250"
+      ]
+    },
+    {
+      "text": "a 750ml bottle for $12.50",
+      "values": [
+        "750",
+        "12.5"
+      ]
+    },
+    {
+      "text": "order HAT266 and item M20IZO",
+      "values": [
+        "HAT266",
+        "M20IZO"
+      ]
+    },
+    {
+      "text": "your 5G signal is weak, try 4G/5G preferred",
+      "values": []
+    },
+    {
+      "text": "Check for a message (such as \"SIM missing\" or \"SIM locked\"), or if it simply shows \"No Signal.\"",
+      "values": [
+        "SIM locked",
+        "No Signal"
+      ]
+    },
+    {
+      "text": "the status is \"return requested.\"",
+      "values": [
+        "return requested"
+      ]
+    },
+    {
+      "text": "Your line ending in 2002 is on the Premium Plan with a 15GB data limit and 2GB refueled",
+      "values": [
+        "15",
+        "2002"
+      ]
+    },
+    {
+      "text": "Tap \"Network & Internet\" then \"Mobile Network\"",
+      "values": [
+        "Network & Internet",
+        "Mobile Network"
+      ]
+    },
+    {
+      "text": "Refund of $45.99 for order W5272531 on 2024-05-19",
+      "values": [
+        "05-19",
+        "2024-05-19",
+        "2024",
+        "W5272531",
+        "45.99"
+      ]
+    },
+    {
+      "text": "about 250ms of latency",
+      "values": []
+    }
+  ]
+}

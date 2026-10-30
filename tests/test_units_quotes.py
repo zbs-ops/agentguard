@@ -3,10 +3,20 @@ boundaries. The expected values come from tool-truth 0.5.5's own extractValues o
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from agentguard.provenance import check_transcript, load_transcript
 from agentguard.provenance.values import extract_values
+
+FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "units-quotes-expected.json").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("case", FIXTURE["cases"], ids=[c["text"][:40] for c in FIXTURE["cases"]])
+def test_same_values_as_tool_truth_in_the_same_order(case: dict) -> None:
+    assert extract_values(case["text"]) == case["values"]
 
 
 @pytest.mark.parametrize(
@@ -37,3 +47,8 @@ def test_an_invented_unit_number_is_still_flagged() -> None:
         {"role": "assistant", "content": "You are on the Premium Plan with a 40GB monthly data limit."},
     ]})
     assert not check_transcript(t).honest
+
+
+def test_quotes_do_not_pair_across_a_gap() -> None:
+    values = extract_values('Look for (such as "SIM missing" or "SIM locked"), or if it simply shows "No Signal."')
+    assert not any("or if it simply shows" in v for v in values)

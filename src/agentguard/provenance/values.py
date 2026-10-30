@@ -119,7 +119,9 @@ _HEDGED = re.compile(
 _LIST_MARKER = re.compile(r"(^|\n|\s)(\d{1,3})[.)]\s")
 _SEP_ID = re.compile(r"\b(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Za-z])[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)+\b")
 _RUN_ID = re.compile(r"\b(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{4,}\b")
-_QUOTED = re.compile(r'"([^"\n]{2,80})"')
+# Paired at word boundaries, so '"SIM locked"), or if it shows "No Signal"' doesn't pair the
+# middle as a quote. (tool-truth round 7.)
+_QUOTED = re.compile(r'(?<![A-Za-z0-9])"([^"\n]{2,80})"(?![A-Za-z0-9])')
 # A number with a multi-letter unit glued on (15GB, 8.7GB, 250ms, 750ml) is a number, not a code.
 # Single-letter suffixes stay out, so "5G" isn't the number 5. (tool-truth round 7.)
 _UNIT_NUMBER = re.compile(
