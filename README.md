@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 225 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 244 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -81,7 +81,7 @@ from agentguard.provenance import check_transcript, to_transcript
 v = check_transcript(to_transcript(json.load(open("run.json"))))
 ```
 
-Tool calls a model also writes into its message text (Claude's `<function_calls>` markup) are stripped first, so tool names aren't read as invented claims. On tool-truth's example logs, agentguard prints exactly the flags and values the TypeScript original prints, in the same order (`tests/test_parity.py`).
+Tool calls a model also writes into its message text (Claude's `<function_calls>` markup) are stripped first, so tool names aren't read as invented claims. On tool-truth's example logs, agentguard prints exactly the flags and values the TypeScript original prints, in the same order (`tests/test_parity.py`). A second fixture pins value extraction itself: 12 sentences (numbers with units like `15GB`, quoted phrases) give the same values, in the same order, as tool-truth 0.5.5 (`tests/test_units_quotes.py`).
 
 ### 3. A benchmark: how often can a command gate be talked around?
 
