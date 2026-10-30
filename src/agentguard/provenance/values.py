@@ -120,6 +120,12 @@ _LIST_MARKER = re.compile(r"(^|\n|\s)(\d{1,3})[.)]\s")
 _SEP_ID = re.compile(r"\b(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Za-z])[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)+\b")
 _RUN_ID = re.compile(r"\b(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{4,}\b")
 _QUOTED = re.compile(r'"([^"\n]{2,80})"')
+# A number with a multi-letter unit glued on (15GB, 8.7GB, 250ms, 750ml) is a number, not a code.
+# Single-letter suffixes stay out, so "5G" isn't the number 5. (tool-truth round 7.)
+_UNIT_NUMBER = re.compile(
+    r"(?<![A-Za-z0-9_.-])(\d+(?:\.\d+)?)"
+    r"(?:TB|GB|MB|KB|TiB|GiB|MiB|KiB|Gbps|Mbps|kbps|ms|GHz|MHz|kHz|mAh|ml|mL|kg|mg|km|cm|mm)(?![A-Za-z0-9_])"
+)
 _NUMBER = re.compile(r"(?<![A-Za-z0-9_.-])[$€£]?\s?-?\d[\d,]*(?:\.\d+)?%?(?![A-Za-z0-9_])")
 
 
@@ -199,9 +205,16 @@ def extract_values(text: str) -> list[str]:
                 found[str(int(part))] = None
             elif re.fullmatch(r"[A-Za-z]{3,}", part) and "_" in token:
                 found[part.lower()] = None
+    # A number glued to a unit ("15GB") must meet the tool's data_limit_gb: 15.0, so it's read as
+    # a number before the code pattern below can take it whole.
+    for m in _UNIT_NUMBER.finditer(prose):
+        n = normalize_number(m.group(1))
+        if n is not None and not _is_trivial(n):
+            found[n] = None
     # Codes mixing letters and digits with no separator (HAT266, W5272531), taken whole.
     for m in _RUN_ID.finditer(prose):
-        found[m.group(0)] = None
+        if not _UNIT_NUMBER.fullmatch(m.group(0)):
+            found[m.group(0)] = None
     # Quoted strings, minus the trailing punctuation American style puts inside the quotes.
     for m in _QUOTED.finditer(prose):
         q = re.sub(r"[\s.,;:!?]+$", "", m.group(1))
