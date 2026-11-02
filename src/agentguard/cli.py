@@ -19,7 +19,7 @@ from collections.abc import Sequence
 
 from agentguard.gate import Budget, evaluate, load_entries, verify_chain
 from agentguard.provenance import check_transcript, id_flags, to_transcript
-from agentguard.shell import format_report, run_bench, wrapper_set
+from agentguard.shell import format_report, run_bench, script_set, wrapper_set
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
@@ -55,6 +55,9 @@ def _cmd_gate(args: argparse.Namespace) -> int:
 def _cmd_bench(args: argparse.Namespace) -> int:
     if args.wrappers:
         intents, mutators = wrapper_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.scripts:
+        intents, mutators = script_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
@@ -92,6 +95,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     p_bench = sub.add_parser("bench", help="run the shell-command gate benchmark")
     p_bench.add_argument("--wrappers", action="store_true", help="the extended set: env / command / nice / timeout rewrites")
+    p_bench.add_argument("--scripts", action="store_true", help="the script-file set: the command written to a file and run")
     p_bench.set_defaults(func=_cmd_bench)
 
     p_ledger = sub.add_parser("verify-ledger", help="check an approval ledger for tampering")
