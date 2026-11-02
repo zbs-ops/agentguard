@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 251 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 268 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -105,6 +105,8 @@ Two findings worth the whole module: a more precise denylist is not a safer one 
 
 There's also a wrapper set (`agentguard bench --wrappers`, or `i, m = wrapper_set(); run_bench(intents=i, mutators=m)`): one harmless word in front, like `timeout 5 rm` or `env rm`. The [gate-bypass-bench](https://github.com/zbs-ops/gate-bypass-bench) study found this gets past the real deny rules of Gemini CLI, Codex and opencode 12 times out of 12. A first-word denylist here does the same; the allowlist still holds at 0/12. It's kept separate, so the scorecard above is unchanged.
 
+And a script-file set (`agentguard bench --scripts`): write the blocked command into a file and run it (`sh s.sh`, dot-source, a here-document, or base64 into a file). The gate judges `sh s.sh`, not the command in the file, so even the tokenized denylist lets all 12 through; the same gate-bypass-bench study found all three products' deny rules do too. The allowlist holds at 0/12. The renderings match gate-bypass-bench byte for byte (`tests/fixtures/script-renderings.json`).
+
 ---
 
 ## A pytest plugin
@@ -129,6 +131,7 @@ agentguard check run.json            # OpenAI, Anthropic or agentguard format; e
 agentguard check run.json --ids-only # only high-confidence invented IDs
 agentguard gate refund.create --cost 9000 --amount 9000
 agentguard bench                     # the shell-gate scorecard
+agentguard bench --scripts           # the script-file attack set
 agentguard verify-ledger ledger.json # exit 1 and name the first edited entry
 ```
 
