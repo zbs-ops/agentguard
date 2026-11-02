@@ -128,7 +128,8 @@ _UNIT_NUMBER = re.compile(
     r"(?<![A-Za-z0-9_.-])(\d+(?:\.\d+)?)"
     r"(?:TB|GB|MB|KB|TiB|GiB|MiB|KiB|Gbps|Mbps|kbps|ms|GHz|MHz|kHz|mAh|ml|mL|kg|mg|km|cm|mm)(?![A-Za-z0-9_])"
 )
-_NUMBER = re.compile(r"(?<![A-Za-z0-9_.-])[$€£]?\s?-?\d[\d,]*(?:\.\d+)?%?(?![A-Za-z0-9_])")
+# The lookahead also refuses a following ".digit", or "8.7GB" backtracks to a stray "8".
+_NUMBER = re.compile(r"(?<![A-Za-z0-9_.-])[$€£]?\s?-?\d[\d,]*(?:\.\d+)?%?(?![A-Za-z0-9_]|\.\d)")
 
 
 def extract_values(text: str) -> list[str]:
