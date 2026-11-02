@@ -193,3 +193,50 @@ def test_wrapper_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
     cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
     got = {m.id: [m.render(b, a) for b, a in cases] for m in make_wrapper_mutators()}
     assert got == expected
+
+
+from agentguard.shell import make_script_mutators, script_set  # noqa: E402
+
+_SCRIPT_CASES = [(f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_script_mutators()]
+
+
+@pytest.mark.parametrize(("_name", "mutator", "intent"), _SCRIPT_CASES)
+def test_every_script_file_attack_still_has_the_effect(_name, mutator, intent) -> None:
+    command = mutator.render(intent.binary, intent.args)
+    effective, _ = run_and_check(command, intent.setup, intent.effect_happened)
+    assert effective, f"command was a no-op: {command}"
+
+
+def test_only_base64_script_keeps_the_binary_off_the_line() -> None:
+    render = {m.id: m.render("rm", ("protected.dat",)) for m in make_script_mutators()}
+    assert "rm" not in render["base64-script"]
+    assert "rm protected.dat" in render["script-write-run"]
+
+
+def test_script_set_is_12_effective_attacks_and_leaves_the_original_45_alone() -> None:
+    cells = [c for c in run_bench(intents=script_set()[0], mutators=script_set()[1]).cells if c.gate == "allowlist"]
+    assert len(cells) == 12
+    assert all(c.effective for c in cells)
+
+
+def test_script_files_defeat_the_tokenized_denylist_but_not_the_allowlist() -> None:
+    i, m = script_set()
+    r = run_bench(intents=i, mutators=m)
+    assert _score(r, "tokenized-denylist").bypasses == 12
+    assert _score(r, "allowlist").bypasses == 0
+
+
+def test_the_script_set_is_disjoint_from_the_core_and_wrapper_sets() -> None:
+    taken = {m.id for m in make_mutators()} | {m.id for m in make_wrapper_mutators()}
+    assert taken.isdisjoint({m.id for m in make_script_mutators()})
+    assert len(make_script_mutators()) == 4
+
+
+def test_script_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
+    import json
+    from pathlib import Path
+
+    expected = json.loads((Path(__file__).parent / "fixtures" / "script-renderings.json").read_text())
+    cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
+    got = {m.id: [m.render(b, a) for b, a in cases] for m in make_script_mutators()}
+    assert got == expected
