@@ -1,19 +1,17 @@
 {
-  "tool_truth_version": "0.5.5",
+  "tool_truth_version": "0.5.6",
   "cases": [
     {
       "text": "a 15GB monthly limit, you used 8.7GB",
       "values": [
         "15",
-        "8.7",
-        "8"
+        "8.7"
       ]
     },
     {
       "text": "you have used 8.7GB",
       "values": [
-        "8.7",
-        "8"
+        "8.7"
       ]
     },
     {
