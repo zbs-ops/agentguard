@@ -167,7 +167,16 @@ Background: Chen & Lin, *denylist fragility in AI agents* ([arXiv:2606.15549](ht
 
 ## How I build
 
-I work with an AI coding assistant as a pair programmer. I decide what gets built, review every change, and own what ships.
+I pick what gets built and why: a pip-installable version of guardrails I'd already tested in TypeScript, so they can run in anyone's Python CI. The building is done by Friday, an AI agent I run. Friday writes the code and the tests on its own cloud machine, opens each change as a pull request, and merges it when CI passes. For each release I get a plain-language write-up of what changed and how it was checked.
+
+**How a port is checked.** A port isn't trusted because it looks right. Both versions run on the same inputs and the outputs are compared: the ledger has to match the TypeScript one byte for byte (hashes included), the checker has to print the same flags in the same order on tool-truth's logs, and the script attacks have to render exactly as gate-bypass-bench renders them. Each of those is a committed fixture with a test.
+
+**Problems hit, and the fixes:**
+
+- **The name was taken.** PyPI refused `agentguard` as too close to an existing project, so it ships as `agentguard-eval` and still imports as `agentguard`.
+- **An approval token could approve the wrong thing.** Found in agent-governance and carried into the port: action ids restart with every new Governor, so a token bound only to `act_0001` approved a different, bigger `act_0001`. Tokens here are bound to the action's contents, with a test for that case.
+- **A number cut short.** The value extractor could read `1.5GB` as `1`, because the number pattern backed off to the whole part. Found in tool-truth first; both are fixed and a shared fixture keeps them matching.
+- **Branches that never got tested.** CI here runs on pull requests, so a pushed branch on its own showed nothing. The pull request now gets opened before waiting on CI.
 
 ## License
 
