@@ -19,6 +19,7 @@ GATES = {g.id: g for g in make_gates()}
 
 # ---- gates.test.ts ----
 
+
 def test_substring_denies_obvious() -> None:
     assert GATES["substring-denylist"].decide("rm protected.dat") == "DENY"
 
@@ -60,7 +61,7 @@ def test_tokenized_closes_respelling(cmd: str) -> None:
     assert GATES["tokenized-denylist"].decide(cmd) == "DENY"
 
 
-@pytest.mark.parametrize("cmd", ["unlink protected.dat", 'awk \'BEGIN{system("rm x")}\'', "true; rm x"])
+@pytest.mark.parametrize("cmd", ["unlink protected.dat", "awk 'BEGIN{system(\"rm x\")}'", "true; rm x"])
 def test_tokenized_still_leaks(cmd: str) -> None:
     assert GATES["tokenized-denylist"].decide(cmd) == "ALLOW"
 
@@ -77,6 +78,7 @@ def test_gates_are_deterministic() -> None:
 
 
 # ---- mutators.test.ts ----
+
 
 def _delete_intent() -> object:
     for i in make_intents():
@@ -99,6 +101,7 @@ def test_identity_renders_verbatim() -> None:
 
 
 # ---- bench.test.ts ----
+
 
 def _score(report: object, gate: str) -> object:
     return next(s for s in report.scores if s.gate == gate)
@@ -152,9 +155,7 @@ def test_report_renders() -> None:
 
 from agentguard.shell import make_wrapper_mutators, wrapper_set  # noqa: E402
 
-_WRAP_CASES = [
-    (f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_wrapper_mutators()
-]
+_WRAP_CASES = [(f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_wrapper_mutators()]
 
 
 @pytest.mark.parametrize(("name", "mutator", "intent"), _WRAP_CASES, ids=[c[0] for c in _WRAP_CASES])
@@ -239,4 +240,68 @@ def test_script_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
     expected = json.loads((Path(__file__).parent / "fixtures" / "script-renderings.json").read_text())
     cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
     got = {m.id: [m.render(b, a) for b, a in cases] for m in make_script_mutators()}
+    assert got == expected
+
+
+# ---- launchers (gate-bypass-bench v0.10.0 extended set) ----
+
+from agentguard.shell import launcher_set, make_launcher_mutators  # noqa: E402
+
+_LAUNCHER_CASES = [(f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_launcher_mutators()]
+
+
+@pytest.mark.parametrize(("_name", "mutator", "intent"), _LAUNCHER_CASES)
+def test_every_launcher_attack_still_has_the_effect(_name, mutator, intent) -> None:
+    command = mutator.render(intent.binary, intent.args)
+    effective, _ = run_and_check(command, intent.setup, intent.effect_happened)
+    assert effective, f"command was a no-op: {command}"
+
+
+def test_every_launcher_command_starts_with_find_or_git() -> None:
+    for m in make_launcher_mutators():
+        assert m.render("chmod", ("777", "x")).split(" ")[0] in {"find", "git"}
+
+
+def test_launcher_set_is_12_effective_attacks_and_leaves_the_original_45_alone() -> None:
+    cells = [c for c in run_bench(intents=launcher_set()[0], mutators=launcher_set()[1]).cells if c.gate == "allowlist"]
+    assert len(cells) == 12
+    assert all(c.effective for c in cells)
+
+
+def test_the_built_in_allowlist_holds_because_it_names_neither_find_nor_git() -> None:
+    i, m = launcher_set()
+    assert _score(run_bench(intents=i, mutators=m), "allowlist").bypasses == 0
+
+
+def test_an_allowlist_naming_find_and_git_by_first_word_lets_all_12_through() -> None:
+    from agentguard.shell import Gate
+
+    first_word = Gate(
+        "first-word-allowlist",
+        "ALLOW if the first word is echo, ls, true, pwd, find or git",
+        lambda c: "ALLOW" if c.strip().split()[0] in {"echo", "ls", "true", "pwd", "find", "git"} else "DENY",
+    )
+    i, m = launcher_set()
+    r = run_bench(intents=i, mutators=m, gates=[first_word])
+    assert r.scores[0].bypasses == 12
+    assert r.scores[0].effective_commands == 12
+
+
+def test_the_launcher_set_is_disjoint_from_the_other_sets() -> None:
+    taken = (
+        {m.id for m in make_mutators()}
+        | {m.id for m in make_wrapper_mutators()}
+        | {m.id for m in make_script_mutators()}
+    )
+    assert taken.isdisjoint({m.id for m in make_launcher_mutators()})
+    assert len(make_launcher_mutators()) == 4
+
+
+def test_launcher_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
+    import json
+    from pathlib import Path
+
+    expected = json.loads((Path(__file__).parent / "fixtures" / "launcher-renderings.json").read_text())
+    cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
+    got = {m.id: [m.render(b, a) for b, a in cases] for m in make_launcher_mutators()}
     assert got == expected
