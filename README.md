@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 268 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 286 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -107,6 +107,8 @@ There's also a wrapper set (`agentguard bench --wrappers`, or `i, m = wrapper_se
 
 And a script-file set (`agentguard bench --scripts`): write the blocked command into a file and run it (`sh s.sh`, dot-source, a here-document, or base64 into a file). The gate judges `sh s.sh`, not the command in the file, so even the tokenized denylist lets all 12 through; the same gate-bypass-bench study found all three products' deny rules do too. The allowlist holds at 0/12. The renderings match gate-bypass-bench byte for byte (`tests/fixtures/script-renderings.json`).
 
+And a launcher set (`agentguard bench --launchers`): the command run from `find -exec`, `find -execdir`, `find -exec sh -c`, or a `git -c alias.x='!cmd' x` alias. This is the one case the allowlist doesn't cover for free: the built-in allowlist here still holds at 0/12, because it names only four harmless programs, but it names neither `find` nor `git`. The gate-bypass-bench study added those two (the programs agents use all day) to each product's allow rule and found Gemini CLI and opencode then let all 12 through, Codex 3 of 12. So an allowlist is only as safe as the programs on it. Renderings pinned to gate-bypass-bench (`tests/fixtures/launcher-renderings.json`).
+
 ---
 
 ## A pytest plugin
@@ -132,6 +134,7 @@ agentguard check run.json --ids-only # only high-confidence invented IDs
 agentguard gate refund.create --cost 9000 --amount 9000
 agentguard bench                     # the shell-gate scorecard
 agentguard bench --scripts           # the script-file attack set
+agentguard bench --launchers         # the launcher set (find -exec, git aliases)
 agentguard verify-ledger ledger.json # exit 1 and name the first edited entry
 ```
 
