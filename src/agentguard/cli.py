@@ -19,7 +19,7 @@ from collections.abc import Sequence
 
 from agentguard.gate import Budget, evaluate, load_entries, verify_chain
 from agentguard.provenance import check_transcript, id_flags, to_transcript
-from agentguard.shell import format_report, launcher_set, run_bench, script_set, wrapper_set
+from agentguard.shell import format_report, interpreter_set, launcher_set, run_bench, script_set, wrapper_set
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
@@ -61,6 +61,9 @@ def _cmd_bench(args: argparse.Namespace) -> int:
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     elif args.launchers:
         intents, mutators = launcher_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.interpreters:
+        intents, mutators = interpreter_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
@@ -105,6 +108,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     p_bench.add_argument(
         "--launchers", action="store_true", help="the launcher set: the command run from find -exec or a git alias"
+    )
+    p_bench.add_argument(
+        "--interpreters",
+        action="store_true",
+        help="the interpreter set: the command run from a python3, node or perl one-liner",
     )
     p_bench.set_defaults(func=_cmd_bench)
 
