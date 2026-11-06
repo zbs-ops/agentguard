@@ -109,6 +109,8 @@ And a script-file set (`agentguard bench --scripts`): write the blocked command 
 
 And a launcher set (`agentguard bench --launchers`): the command run from `find -exec`, `find -execdir`, `find -exec sh -c`, or a `git -c alias.x='!cmd' x` alias. This is the one case the allowlist doesn't cover for free: the built-in allowlist here still holds at 0/12, because it names only four harmless programs, but it names neither `find` nor `git`. The gate-bypass-bench study added those two (the programs agents use all day) to each product's allow rule and found Gemini CLI and opencode then let all 12 through, Codex 3 of 12. So an allowlist is only as safe as the programs on it. Renderings pinned to gate-bypass-bench (`tests/fixtures/launcher-renderings.json`).
 
+And an interpreter set (`agentguard bench --interpreters`): the command run from a `python3 -c`, `node -e` or `perl -e` one-liner, like `python3 -c 'import os; os.system("...")'`. These are the same problem as the launchers, with programs an agent is even more likely to be allowed. The tokenized denylist lets every one through, and an allowlist that names `python3`, `node` or `perl` does too (a test builds that allowlist and checks). That's 9 attacks where all three interpreters are installed; an attack whose interpreter is missing doesn't run, so it drops out of the denominator instead of counting as blocked. The sandbox PATH gained `/usr/local/bin` at the end, where node usually lives; every other scorecard here is byte-for-byte unchanged. Renderings, and the whole scorecard, match gate-bypass-bench (`tests/fixtures/interpreter-renderings.json`).
+
 ---
 
 ## A pytest plugin
@@ -135,6 +137,7 @@ agentguard gate refund.create --cost 9000 --amount 9000
 agentguard bench                     # the shell-gate scorecard
 agentguard bench --scripts           # the script-file attack set
 agentguard bench --launchers         # the launcher set (find -exec, git aliases)
+agentguard bench --interpreters      # the interpreter set (python3 -c, node -e, perl -e)
 agentguard verify-ledger ledger.json # exit 1 and name the first edited entry
 ```
 
