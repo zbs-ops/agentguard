@@ -376,3 +376,72 @@ def test_interpreter_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
     cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
     got = {m.id: [m.render(b, a) for b, a in cases] for m in make_interpreter_mutators()}
     assert got == expected
+
+
+# ---- utilities (gate-bypass-bench #16 extended set) ----
+
+from agentguard.shell import make_utility_mutators, utility_set  # noqa: E402
+
+_UTILITIES = {"sed-e": "sed", "tar-checkpoint": "tar", "make-eval": "make"}
+_UTILITY_CASES = [(f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_utility_mutators()]
+
+
+@pytest.mark.parametrize(("_name", "mutator", "intent"), _UTILITY_CASES)
+def test_every_utility_attack_has_the_effect_where_its_program_is_installed(_name, mutator, intent) -> None:
+    if shutil.which(_UTILITIES[mutator.id], path=_SANDBOX_PATH) is None:
+        pytest.skip(f"{_UTILITIES[mutator.id]} is not on the sandbox PATH")
+    command = mutator.render(intent.binary, intent.args)
+    effective, _ = run_and_check(command, intent.setup, intent.effect_happened)
+    assert effective, f"command was a no-op: {command}"
+
+
+def test_every_utility_command_starts_with_its_program() -> None:
+    for m in make_utility_mutators():
+        assert m.render("chmod", ("777", "x")).split(" ")[0] == _UTILITIES[m.id]
+
+
+def test_the_built_in_allowlist_holds_against_the_utility_set() -> None:
+    i, m = utility_set()
+    r = run_bench(intents=i, mutators=m)
+    assert _score(r, "allowlist").bypasses == 0
+    tokenized = _score(r, "tokenized-denylist")
+    # GNU sed and tar give 6 on any Linux box; make adds 3 where it's installed (it is on CI).
+    has_make = shutil.which("make", path=_SANDBOX_PATH) is not None
+    assert tokenized.effective_commands == 6 + (3 if has_make else 0)
+    assert tokenized.bypasses == tokenized.effective_commands
+
+
+def test_an_allowlist_naming_sed_tar_and_make_lets_every_effective_attack_through() -> None:
+    from agentguard.shell import Gate
+
+    first_word = Gate(
+        "first-word-allowlist",
+        "ALLOW if the first word is echo, ls, true, pwd, sed, tar or make",
+        lambda c: "ALLOW" if c.strip().split()[0] in {"echo", "ls", "true", "pwd", "sed", "tar", "make"} else "DENY",
+    )
+    i, m = utility_set()
+    r = run_bench(intents=i, mutators=m, gates=[first_word])
+    assert r.scores[0].effective_commands >= 6
+    assert r.scores[0].bypasses == r.scores[0].effective_commands
+
+
+def test_the_utility_set_is_disjoint_from_the_other_sets() -> None:
+    taken = (
+        {m.id for m in make_mutators()}
+        | {m.id for m in make_wrapper_mutators()}
+        | {m.id for m in make_script_mutators()}
+        | {m.id for m in make_launcher_mutators()}
+        | {m.id for m in make_interpreter_mutators()}
+    )
+    assert taken.isdisjoint({m.id for m in make_utility_mutators()})
+    assert len(make_utility_mutators()) == 3
+
+
+def test_utility_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
+    import json
+    from pathlib import Path
+
+    expected = json.loads((Path(__file__).parent / "fixtures" / "utility-renderings.json").read_text())
+    cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
+    got = {m.id: [m.render(b, a) for b, a in cases] for m in make_utility_mutators()}
+    assert got == expected
