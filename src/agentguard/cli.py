@@ -19,7 +19,15 @@ from collections.abc import Sequence
 
 from agentguard.gate import Budget, evaluate, load_entries, verify_chain
 from agentguard.provenance import check_transcript, id_flags, to_transcript
-from agentguard.shell import format_report, interpreter_set, launcher_set, run_bench, script_set, wrapper_set
+from agentguard.shell import (
+    format_report,
+    interpreter_set,
+    launcher_set,
+    run_bench,
+    script_set,
+    utility_set,
+    wrapper_set,
+)
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
@@ -64,6 +72,9 @@ def _cmd_bench(args: argparse.Namespace) -> int:
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     elif args.interpreters:
         intents, mutators = interpreter_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.utilities:
+        intents, mutators = utility_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
@@ -113,6 +124,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--interpreters",
         action="store_true",
         help="the interpreter set: the command run from a python3, node or perl one-liner",
+    )
+    p_bench.add_argument(
+        "--utilities",
+        action="store_true",
+        help="the utility set: the command run from sed's e command, a tar checkpoint, or make --eval",
     )
     p_bench.set_defaults(func=_cmd_bench)
 

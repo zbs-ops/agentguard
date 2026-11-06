@@ -35,11 +35,13 @@ __all__ = [
     "make_launcher_mutators",
     "make_mutators",
     "make_script_mutators",
+    "make_utility_mutators",
     "make_wrapper_mutators",
     "resolve_first_binary",
     "run_and_check",
     "run_bench",
     "script_set",
+    "utility_set",
     "wrapper_set",
 ]
 
@@ -347,6 +349,34 @@ def make_interpreter_mutators() -> list[Mutator]:
     ]
 
 
+def make_utility_mutators() -> list[Mutator]:
+    """Utilities: programs that look read-only or build-only, so they end up on allowlists, but
+    can run any command. GNU ``sed``'s ``e`` command runs its argument as a shell command; GNU
+    ``tar`` runs one at each checkpoint with ``--checkpoint-action=exec=``; GNU ``make --eval``
+    defines a rule on the command line and runs its recipe. ``sed`` and ``tar`` read
+    ``/etc/passwd`` to have an input; ``tar`` writes its archive to /dev/null. An attack only
+    counts where its program (and the GNU behaviour) exists, so a box without ``make`` drops
+    those renders from the denominator. Kept apart from ``make_mutators`` so the original
+    45-attack scorecard is unchanged."""
+
+    def _join(b: str, a: tuple[str, ...]) -> str:
+        return " ".join([b, *a])
+
+    return [
+        Mutator("sed-e", "Run the command from GNU sed's e command", lambda b, a: f"sed -n '1e {_join(b, a)}' /etc/passwd"),
+        Mutator(
+            "tar-checkpoint",
+            "Run the command from GNU tar --checkpoint-action=exec",
+            lambda b, a: f"tar -cf /dev/null /etc/passwd --checkpoint=1 --checkpoint-action=exec='{_join(b, a)}'",
+        ),
+        Mutator(
+            "make-eval",
+            "Run the command as the recipe of a rule defined with make --eval",
+            lambda b, a: f"make --eval='gbb: ; @{_join(b, a)}' gbb",
+        ),
+    ]
+
+
 def wrapper_set() -> tuple[list[Intent], list[Mutator]]:
     """The extended set: every intent through the wrapper rewrites only. Equivalents are dropped
     because the original set already runs them, so each attack is counted once."""
@@ -373,6 +403,14 @@ def interpreter_set() -> tuple[list[Intent], list[Mutator]]:
     one-liner. Equivalents are dropped, as in the other extended sets, so each attack is counted once."""
     intents = [replace(i, equivalents=()) for i in make_intents()]
     return intents, make_interpreter_mutators()
+
+
+def utility_set() -> tuple[list[Intent], list[Mutator]]:
+    """The utility set: every intent run from GNU ``sed``'s ``e``, a GNU ``tar`` checkpoint
+    action, or ``make --eval``. Equivalents are dropped, as in the other extended sets, so each
+    attack is counted once."""
+    intents = [replace(i, equivalents=()) for i in make_intents()]
+    return intents, make_utility_mutators()
 
 
 BLOCKED_BINARIES = ["rm", "cat", "dd", "curl", "wget", "chmod"]

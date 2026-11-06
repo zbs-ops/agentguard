@@ -19,11 +19,13 @@ from agentguard.shell.model import (
     make_launcher_mutators,
     make_mutators,
     make_script_mutators,
+    make_utility_mutators,
     make_wrapper_mutators,
     resolve_first_binary,
     run_and_check,
     run_bench,
     script_set,
+    utility_set,
     wrapper_set,
 )
 
@@ -44,10 +46,12 @@ __all__ = [
     "make_launcher_mutators",
     "make_mutators",
     "make_script_mutators",
+    "make_utility_mutators",
     "make_wrapper_mutators",
     "resolve_first_binary",
     "run_and_check",
     "run_bench",
     "script_set",
+    "utility_set",
     "wrapper_set",
 ]
