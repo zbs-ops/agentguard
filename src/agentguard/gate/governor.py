@@ -221,7 +221,10 @@ class Governor:
             estimated_cost_cents=estimated_cost_cents,
             args=args,
             budget=self.budget,
-            history=History(recent_unattended_writes=self._recent_unattended_writes(agent, now)),
+            history=History(
+                recent_unattended_writes=self._recent_unattended_writes(agent, now),
+                repeat_of=self._live_copy(agent, tool, args, now),
+            ),
         )
         self._record(
             "POLICY_EVALUATED",
@@ -291,6 +294,20 @@ class Governor:
         return action
 
     # -- internals -------------------------------------------------------------------------
+    def _live_copy(self, agent: str, tool: str, args: dict[str, Any], now: float) -> tuple[str, str] | None:
+        """An earlier request for exactly this action that is still live: waiting, approved or
+        already run, within the approval window. Rejected, blocked and expired ones don't count."""
+        key = _canonical({"agent": agent, "tool": tool, "args": args})
+        live = {State.PENDING_APPROVAL, State.APPROVED, State.EXECUTED, State.AUTO_ALLOWED}
+        for a in self._actions:
+            if (
+                a.state in live
+                and now - a.created_at < self.approval_ttl_seconds
+                and _canonical({"agent": a.agent, "tool": a.tool, "args": a.args}) == key
+            ):
+                return a.id, a.state.value
+        return None
+
     def _recent_unattended_writes(self, agent: str, now: float) -> int:
         return sum(
             1
