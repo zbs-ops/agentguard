@@ -33,7 +33,9 @@ print(d.verdict.value, d.decided_by)   # REQUIRE_APPROVAL cost-understated
 print(d.reason)   # "The agent estimated $1.00, but the arguments move $90.00 — escalated for review."
 ```
 
-Seven ordered checks, each one asserted by a test: a malformed tool name is refused before it can borrow another rule, an unknown tool fails closed, a negative or non-finite cost is refused before the budget math, the budget is checked before the tier, an understated or unusually large spend is escalated, and a runaway loop of writes is paused.
+Eight ordered checks, each one asserted by a test: a malformed tool name is refused before it can borrow another rule, an unknown tool fails closed, a negative or non-finite cost is refused before the budget math, the budget is checked before the tier, a repeat of a money-moving or tier-3 request that is still waiting or already ran is refused, an understated or unusually large spend is escalated, and a runaway loop of writes is paused.
+
+The repeat check is there because an agent that times out waiting for an answer often just asks again; without it, a person approving both copies would pay the same refund twice. `Governor` supplies it as `History(repeat_of=...)`, so `evaluate` stays pure. Asking again after a rejection or expiry is fine, and a different order id is a different request. A ledger written by agent-governance for this case (`tests/fixtures/governance-repeat-ledger.json`) is reproduced byte for byte.
 
 `evaluate` judges one call. `Governor` runs the whole approval workflow around it: it holds what's waiting for a person, checks who is approving, charges the budget only when something actually runs, and writes every step to a hash-chained ledger.
 
