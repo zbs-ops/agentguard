@@ -84,6 +84,9 @@ class History:
     """What the gate knows about recent activity. The caller supplies it; the gate stays pure."""
 
     recent_unattended_writes: int = 0
+    #: An earlier request with the same agent, tool and arguments that is still waiting, was
+    #: approved, or already ran within the approval window: its id and state.
+    repeat_of: tuple[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -183,6 +186,19 @@ def evaluate(
     if projected > budget.limit_cents:
         reasons.append(f"This would put spend at {money(projected)} against a {money(budget.limit_cents)} cap.")
         return Decision(Verdict.DENY, rule.tier, tuple(reasons), "budget-exceeded", cost)
+
+    # 3b. An agent that timed out waiting for an answer often just asks again. If the same
+    #     action is already waiting, or already went through, a second copy would pay or contact
+    #     the customer twice once both are approved. Only actions that move money or are tier 3
+    #     are refused; the caller only reports copies that are still live.
+    if history.repeat_of is not None and (rule.tier == 3 or cost > 0):
+        first, state = history.repeat_of
+        was = "is still waiting for a person" if state == "PENDING_APPROVAL" else "already went through"
+        reasons.append(
+            f"The same request ({first}) {was}. A repeat would do it twice; to really do it again, "
+            "change the arguments (for example a new request id)."
+        )
+        return Decision(Verdict.DENY, rule.tier, tuple(reasons), "repeated-request", cost)
 
     # 4. An agent that estimates one number and moves a bigger one gets a human's eyes, even on
     #    a tier that would normally run unattended, and the human sees the real amount.
