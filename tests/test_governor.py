@@ -164,7 +164,9 @@ def test_unattended_writes_are_charged_their_estimate_and_denials_nothing():
 def test_the_second_of_two_refunds_that_only_fit_alone_is_blocked_at_approval():
     g, _ = governor()
     each = int(g.budget_limit_cents * 0.6)
-    first, second = refund(g, each), refund(g, each)
+    # Two different refunds (different orders), so neither is a repeat of the other.
+    first = g.propose("billing-agent", "refund.create", {"amount_cents": each, "order": "R-1"}, estimated_cost_cents=each)
+    second = g.propose("billing-agent", "refund.create", {"amount_cents": each, "order": "R-2"}, estimated_cost_cents=each)
     assert approve(g, first.id).state is State.EXECUTED
     late = approve(g, second.id)
     assert late.state is State.BLOCKED
@@ -440,3 +442,94 @@ def test_cli_verifies_a_saved_audit_api_response(tmp_path, capsys):
     saved.write_text(json.dumps({"entries": data["chain"]}), encoding="utf-8")
     assert main(["verify-ledger", str(saved)]) == 0
     assert "All 25 entries verify" in capsys.readouterr().out
+
+
+# -- the same request twice (agent-governance PR #14) -------------------------------------
+
+REPEAT_FIXTURE = Path(__file__).parent / "fixtures" / "governance-repeat-ledger.json"
+
+
+def _ask(g: Governor, order: str = "A-1", **extra: object):
+    args = {"customer": "acme", "amount_cents": 4000, "order": order, **extra}
+    return g.propose("billing-agent", "refund.create", args, estimated_cost_cents=4000)
+
+
+def test_a_repeated_refund_is_paid_once_even_if_both_are_approved():
+    g, _ = governor()
+    first, second = _ask(g), _ask(g)
+    approve(g, first.id)
+    if second.state is State.PENDING_APPROVAL:
+        approve(g, second.id)
+    assert g.spent_cents == 4000
+
+
+def test_the_repeat_is_refused_and_names_the_first_request():
+    g, _ = governor()
+    first = _ask(g)
+    second = _ask(g)
+    assert second.state is State.BLOCKED
+    assert second.decision.decided_by == "repeated-request"
+    assert first.id in second.decision.reasons[-1] and "still waiting" in second.decision.reasons[-1]
+    approve(g, first.id)
+    third = _ask(g)
+    assert "already went through" in third.decision.reasons[-1]
+
+
+def test_asking_again_after_a_no_or_for_a_different_order_is_fine():
+    g, _ = governor()
+    first = _ask(g)
+    g.decide(first.id, False, HUMAN, token=g.mint_token(first.id, HUMAN))
+    assert _ask(g).state is State.PENDING_APPROVAL
+    assert _ask(g, order="A-2").state is State.PENDING_APPROVAL
+
+
+def test_a_copy_older_than_the_approval_window_is_not_a_repeat():
+    g, clock = governor()
+    _ask(g)
+    clock.now += APPROVAL_TTL_SECONDS + 1
+    assert _ask(g).state is State.PENDING_APPROVAL
+
+
+def test_repeated_reads_are_never_refused():
+    g, _ = governor()
+    g.propose("support-agent", "crm.read", {"customer": "acme"})
+    assert g.propose("support-agent", "crm.read", {"customer": "acme"}).state is State.EXECUTED
+
+
+def _replay_typescript_repeat_run() -> Governor:
+    """The calls agent-governance's store made for the repeat fixture: its six seed actions,
+    then the same refund asked for again while waiting and after it ran, and a re-ask after a no."""
+    from datetime import datetime, timezone
+
+    clock = Clock(datetime(2026, 11, 9, 3, 0, tzinfo=timezone.utc).timestamp())
+    g = Governor(reviewer_keys=KEYS, clock=clock)
+    g.propose("support-agent", "crm.read", {"customer": "acme-industries"})
+    g.propose("support-agent", "ticket.create", {"subject": "Duplicate charge on invoice 8842", "priority": "high"})
+    g.propose("billing-agent", "refund.issue", {"invoice": "8842", "amount_cents": 12_400, "reason": "duplicate charge"},
+              estimated_cost_cents=12_400)
+    g.propose("growth-agent", "email.send", {"to": "2,300 customers", "template": "winback-q3"}, estimated_cost_cents=900)
+    g.propose("rogue-agent", "db.drop", {"table": "customers"})
+    g.propose("rogue-agent", "crypto.transfer", {"to": "0xbeef…", "amount": "all"})
+    a = g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 4000, "order": "A-1"},
+                  estimated_cost_cents=4000)
+    g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 4000, "order": "A-1"},
+              estimated_cost_cents=4000)
+    g.decide(a.id, True, HUMAN, note="ok", token=g.mint_token(a.id, HUMAN))
+    g.propose("billing-agent", "refund.create", {"order": "A-1", "amount_cents": 4000, "customer": "acme"},
+              estimated_cost_cents=4000)
+    b = g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 4000, "order": "B-1"},
+                  estimated_cost_cents=4000)
+    g.decide(b.id, False, HUMAN, note="no", token=g.mint_token(b.id, HUMAN))
+    g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 4000, "order": "B-1"},
+              estimated_cost_cents=4000)
+    return g
+
+
+def test_the_repeat_ledger_matches_agent_governance_byte_for_byte():
+    data = json.loads(REPEAT_FIXTURE.read_text(encoding="utf-8"))
+    g = _replay_typescript_repeat_run()
+    assert [e.to_dict() for e in g.ledger()] == data["chain"]
+    assert g.spent_cents == data["budget"]["spentCents"]
+    # This fixture lists actions oldest first, which is the order g.actions() uses.
+    assert [[a.id, a.state.value, a.decision.decided_by] for a in g.actions()] == data["states"]
+    assert verify_chain(load_entries(data)).valid
