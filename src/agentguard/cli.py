@@ -23,6 +23,7 @@ from agentguard.shell import (
     format_report,
     interpreter_set,
     launcher_set,
+    option_set,
     run_bench,
     script_set,
     utility_set,
@@ -75,6 +76,9 @@ def _cmd_bench(args: argparse.Namespace) -> int:
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     elif args.utilities:
         intents, mutators = utility_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.options:
+        intents, mutators = option_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
@@ -129,6 +133,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--utilities",
         action="store_true",
         help="the utility set: the command run from sed's e command, a tar checkpoint, or make --eval",
+    )
+    p_bench.add_argument(
+        "--options",
+        action="store_true",
+        help="the option set: the command run from git --upload-pack, node --import data:, or python3 -m timeit",
     )
     p_bench.set_defaults(func=_cmd_bench)
 
