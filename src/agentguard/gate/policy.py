@@ -17,12 +17,14 @@ from enum import Enum
 
 __all__ = [
     "POLICY",
+    "TWO_PERSON_ABOVE_CENTS",
     "UNATTENDED_WINDOW_SECONDS",
     "UNATTENDED_WRITE_LIMIT",
     "Budget",
     "Decision",
     "History",
     "Verdict",
+    "approvals_required",
     "evaluate",
     "money",
 ]
@@ -69,6 +71,11 @@ _TOOL_NAME = re.compile(r"[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+")
 # many unattended tier-2 writes from one agent inside the window, the next one waits for a person.
 UNATTENDED_WRITE_LIMIT = 10
 UNATTENDED_WINDOW_SECONDS = 60
+
+# Above this amount one person's yes isn't enough: two different reviewers have to approve before
+# the action runs. It's the amount the gate charges, not the agent's estimate, so understating a
+# refund doesn't skip the second person. Same value as agent-governance.
+TWO_PERSON_ABOVE_CENTS = 25_000
 
 
 @dataclass(frozen=True)
@@ -229,3 +236,9 @@ def evaluate(
         return Decision(Verdict.ALLOW, 2, tuple(reasons), rule.id, cost)
 
     return Decision(Verdict.ALLOW, 1, tuple(reasons), rule.id, cost)
+
+
+def approvals_required(decision: Decision, above_cents: int | None = TWO_PERSON_ABOVE_CENTS) -> int:
+    """How many different people must approve an action the gate sent for review: 2 when what
+    it charges is over ``above_cents``, else 1. ``None`` turns the two-person rule off."""
+    return 2 if above_cents is not None and decision.cost_cents > above_cents else 1
