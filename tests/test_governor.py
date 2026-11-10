@@ -13,9 +13,11 @@ import pytest
 
 from agentguard.gate import (
     APPROVAL_TTL_SECONDS,
+    TWO_PERSON_ABOVE_CENTS,
     UNATTENDED_WRITE_LIMIT,
     ApprovalAuthError,
     Governor,
+    SameApproverError,
     SelfApprovalError,
     State,
     mint_approval_token,
@@ -24,7 +26,8 @@ from agentguard.gate import (
 from agentguard.gate.ledger import Entry, load_entries, verify_chain
 
 HUMAN = "you@company.com"
-KEYS = {HUMAN: "demo-human-reviewer-key"}
+FINANCE = "finance@company.com"
+KEYS = {HUMAN: "demo-human-reviewer-key", FINANCE: "demo-finance-reviewer-key"}
 FIXTURE = Path(__file__).parent / "fixtures" / "governance-ledger.json"
 
 
@@ -162,7 +165,8 @@ def test_unattended_writes_are_charged_their_estimate_and_denials_nothing():
 
 
 def test_the_second_of_two_refunds_that_only_fit_alone_is_blocked_at_approval():
-    g, _ = governor()
+    # These refunds are over $250; the cap is what's tested here, so one reviewer is enough.
+    g, _ = governor(two_person_above_cents=None)
     each = int(g.budget_limit_cents * 0.6)
     # Two different refunds (different orders), so neither is a repeat of the other.
     first = g.propose("billing-agent", "refund.create", {"amount_cents": each, "order": "R-1"}, estimated_cost_cents=each)
@@ -178,7 +182,7 @@ def test_the_second_of_two_refunds_that_only_fit_alone_is_blocked_at_approval():
 
 
 def test_spend_lands_exactly_on_the_cap_and_no_further():
-    g, _ = governor()
+    g, _ = governor(two_person_above_cents=None)  # the cap is what's tested, not who approves
     limit = g.budget_limit_cents
     big, small, over = refund(g, limit - 100, "stripe.refund"), refund(g, 100), refund(g, 1)
     assert approve(g, big.id).state is State.EXECUTED
@@ -532,4 +536,128 @@ def test_the_repeat_ledger_matches_agent_governance_byte_for_byte():
     assert g.spent_cents == data["budget"]["spentCents"]
     # This fixture lists actions oldest first, which is the order g.actions() uses.
     assert [[a.id, a.state.value, a.decision.decided_by] for a in g.actions()] == data["states"]
+    assert verify_chain(load_entries(data)).valid
+
+
+# -- two people for a large action (agent-governance PR #15) -----------------------------
+
+TWO_PERSON_FIXTURE = Path(__file__).parent / "fixtures" / "governance-two-person-ledger.json"
+
+
+def approve_as(g: Governor, action_id: str, who: str, note: str | None = "ok"):
+    return g.decide(action_id, True, who, note=note, token=g.mint_token(action_id, who))
+
+
+def test_a_large_refund_waits_for_a_second_person():
+    g, _ = governor()
+    a = refund(g, 30_000)
+    assert approve_as(g, a.id, HUMAN).state is State.PENDING_APPROVAL
+    assert a.approvals == [HUMAN] and g.spent_cents == 0
+    assert approve_as(g, a.id, FINANCE).state is State.EXECUTED
+    assert a.approvals == [HUMAN, FINANCE] and g.spent_cents == 30_000
+
+
+def test_the_same_reviewer_twice_is_refused_and_writes_nothing():
+    g, _ = governor()
+    a = refund(g, 30_000)
+    approve_as(g, a.id, HUMAN)
+    entries = len(g.ledger())
+    with pytest.raises(SameApproverError):
+        g.decide(a.id, True, " You@Company.com ", token=g.mint_token(a.id, HUMAN))
+    assert a.state is State.PENDING_APPROVAL and len(g.ledger()) == entries
+
+
+def test_either_reviewer_can_still_reject_after_the_first_yes():
+    g, _ = governor()
+    a = refund(g, 30_000)
+    approve_as(g, a.id, HUMAN)
+    assert g.decide(a.id, False, FINANCE, token=g.mint_token(a.id, FINANCE)).state is State.REJECTED
+    assert g.spent_cents == 0
+
+
+def test_at_or_under_the_threshold_one_yes_is_enough():
+    g, _ = governor()
+    assert approve_as(g, refund(g, TWO_PERSON_ABOVE_CENTS).id, HUMAN).state is State.EXECUTED
+    assert approve_as(g, refund(g, 12_400).id, HUMAN).state is State.EXECUTED
+
+
+def test_an_understated_estimate_does_not_skip_the_second_person():
+    g, _ = governor()
+    a = g.propose("billing-agent", "refund.create", {"amount_cents": 30_000}, estimated_cost_cents=100)
+    assert approve_as(g, a.id, HUMAN).state is State.PENDING_APPROVAL
+
+
+def test_the_window_and_the_budget_are_checked_again_at_the_second_yes():
+    g, clock = governor()
+    a = refund(g, 30_000)
+    approve_as(g, a.id, HUMAN)
+    clock.now += APPROVAL_TTL_SECONDS + 60
+    late = approve_as(g, a.id, FINANCE)
+    assert late.state is State.BLOCKED and late.decision.decided_by == "approval-expired"
+    g2, _ = governor()
+    big = g2.propose("billing-agent", "refund.create", {"amount_cents": 30_000, "order": "B"}, estimated_cost_cents=30_000)
+    approve_as(g2, big.id, HUMAN)
+    for order in ("C-1", "C-2"):
+        small = g2.propose("billing-agent", "refund.create", {"amount_cents": 12_400, "order": order}, estimated_cost_cents=12_400)
+        approve_as(g2, small.id, HUMAN)
+    after = approve_as(g2, big.id, FINANCE)
+    assert after.state is State.BLOCKED and after.decision.decided_by == "budget-exceeded-at-approval"
+
+
+def test_the_rule_can_be_switched_off():
+    g, _ = governor(two_person_above_cents=None)
+    assert approve_as(g, refund(g, 30_000).id, HUMAN).state is State.EXECUTED
+
+
+def test_approvals_required_counts_the_charged_amount():
+    from agentguard.gate import Decision, Verdict, approvals_required
+
+    d = Decision(Verdict.REQUIRE_APPROVAL, 3, ("x",), "money-movement", 25_001)
+    assert approvals_required(d) == 2
+    assert approvals_required(d, above_cents=None) == 1
+    assert approvals_required(Decision(Verdict.REQUIRE_APPROVAL, 3, ("x",), "money-movement", 25_000)) == 1
+
+
+def _replay_typescript_two_person_run() -> tuple[Governor, str]:
+    """The calls agent-governance's store made for the two-person fixture: its six seed actions,
+    an understated $300 refund approved by one reviewer and rejected by the other, a $300 refund
+    approved twice by the same reviewer (the second refused) and then by finance, and a $200
+    refund on one approval."""
+    from datetime import datetime, timezone
+
+    clock = Clock(datetime(2026, 11, 10, 9, 0, tzinfo=timezone.utc).timestamp())
+    g = Governor(reviewer_keys=KEYS, clock=clock)
+    g.propose("support-agent", "crm.read", {"customer": "acme-industries"})
+    g.propose("support-agent", "ticket.create", {"subject": "Duplicate charge on invoice 8842", "priority": "high"})
+    g.propose("billing-agent", "refund.issue", {"invoice": "8842", "amount_cents": 12_400, "reason": "duplicate charge"},
+              estimated_cost_cents=12_400)
+    g.propose("growth-agent", "email.send", {"to": "2,300 customers", "template": "winback-q3"}, estimated_cost_cents=900)
+    g.propose("rogue-agent", "db.drop", {"table": "customers"})
+    g.propose("rogue-agent", "crypto.transfer", {"to": "0xbeef…", "amount": "all"})
+    r1 = g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 30_000, "order": "2P-1"},
+                   estimated_cost_cents=100)
+    approve_as(g, r1.id, HUMAN)
+    g.decide(r1.id, False, FINANCE, note="not this one", token=g.mint_token(r1.id, FINANCE))
+    r2 = g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 30_000, "order": "2P-2"},
+                   estimated_cost_cents=30_000)
+    approve_as(g, r2.id, HUMAN)
+    refused = ""
+    try:
+        approve_as(g, r2.id, HUMAN, note="again")
+    except SameApproverError as err:
+        refused = str(err)
+    approve_as(g, r2.id, FINANCE, note="second yes")
+    r3 = g.propose("billing-agent", "refund.create", {"customer": "acme", "amount_cents": 20_000, "order": "2P-3"},
+                   estimated_cost_cents=20_000)
+    approve_as(g, r3.id, HUMAN)
+    return g, refused
+
+
+def test_the_two_person_ledger_matches_agent_governance_byte_for_byte():
+    data = json.loads(TWO_PERSON_FIXTURE.read_text(encoding="utf-8"))
+    g, refused = _replay_typescript_two_person_run()
+    assert [e.to_dict() for e in g.ledger()] == data["chain"]
+    assert g.spent_cents == data["budget"]["spentCents"]
+    assert [[a.id, a.state.value, a.decision.decided_by, a.approvals] for a in g.actions()] == data["states"]
+    assert refused == data["refused"]
     assert verify_chain(load_entries(data)).valid
