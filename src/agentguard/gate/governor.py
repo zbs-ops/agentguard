@@ -14,6 +14,8 @@ The rules carried over from ``agent-governance``, each one a bug that project fi
 - The budget is checked again at the moment an approved action would run, because other
   actions may have spent while it waited.
 - A loop of unattended writes from one agent gets slowed down to "ask a person".
+- Above a threshold (``two_person_above_cents``, $250 by default), an action needs two
+  different reviewers before it runs.
 """
 
 from __future__ import annotations
@@ -30,13 +32,24 @@ from enum import Enum
 from typing import Any
 
 from agentguard.gate.ledger import ChainVerification, Entry, append_entry, verify_chain
-from agentguard.gate.policy import UNATTENDED_WINDOW_SECONDS, Budget, Decision, History, Verdict, evaluate, money
+from agentguard.gate.policy import (
+    TWO_PERSON_ABOVE_CENTS,
+    UNATTENDED_WINDOW_SECONDS,
+    Budget,
+    Decision,
+    History,
+    Verdict,
+    approvals_required,
+    evaluate,
+    money,
+)
 
 __all__ = [
     "APPROVAL_TTL_SECONDS",
     "ApprovalAuthError",
     "GatedAction",
     "Governor",
+    "SameApproverError",
     "SelfApprovalError",
     "State",
     "mint_approval_token",
@@ -62,6 +75,10 @@ class SelfApprovalError(Exception):
 
 class ApprovalAuthError(Exception):
     """An approval arrived without a valid token for the named reviewer."""
+
+
+class SameApproverError(Exception):
+    """The reviewer who gave the first of two required approvals tried to give the second."""
 
 
 def _norm(name: str) -> str:
@@ -148,6 +165,8 @@ class GatedAction:
     state: State
     reviewed_by: str | None = None
     review_note: str | None = None
+    #: Reviewers who have said yes so far, on an action that needs two of them.
+    approvals: list[str] | None = None
 
 
 def _digest_of(action: GatedAction) -> str:
@@ -172,6 +191,8 @@ class Governor:
     budget_limit_cents: int = 50_000
     reviewer_keys: Mapping[str, str] = field(default_factory=dict)
     approval_ttl_seconds: float = APPROVAL_TTL_SECONDS
+    #: Above this many cents an action needs two different reviewers; None turns that off.
+    two_person_above_cents: int | None = TWO_PERSON_ABOVE_CENTS
     clock: Callable[[], float] = time.time
     spent_cents: int = 0
     _actions: list[GatedAction] = field(default_factory=list, repr=False)
@@ -261,6 +282,12 @@ class Governor:
         ):
             raise ApprovalAuthError(f"{reviewer!r} did not present a valid token for this decision.")
 
+        # A large action needs two different people. Refusing a repeat yes here, before anything
+        # is written, means one reviewer approving twice changes nothing.
+        two_person = approve and approvals_required(action.decision, self.two_person_above_cents) == 2
+        if two_person and any(_norm(r) == _norm(reviewer) for r in action.approvals or []):
+            raise SameApproverError(f'"{reviewer}" already approved this. It needs a second, different person.')
+
         # Only a yes expires: rejecting a stale request is how the queue gets cleared. Checked
         # after authentication, so a forged attempt can't change anything.
         waited = self.clock() - action.created_at
@@ -279,8 +306,18 @@ class Governor:
             self._record("REJECTED", reviewer, action_id, {"note": note})
             return action
 
-        action.state = State.APPROVED
-        self._record("APPROVED", reviewer, action_id, {"note": note})
+        if two_person:
+            action.approvals = [*(action.approvals or []), reviewer]
+            approval = f"{len(action.approvals)} of 2"
+            if len(action.approvals) < 2:
+                # The first yes is on the record, but the action keeps waiting for a second person.
+                self._record("APPROVED", reviewer, action_id, {"note": note, "approval": approval})
+                return action
+            action.state = State.APPROVED
+            self._record("APPROVED", reviewer, action_id, {"note": note, "approval": approval})
+        else:
+            action.state = State.APPROVED
+            self._record("APPROVED", reviewer, action_id, {"note": note})
         # The cap was checked at proposal time, but other actions may have spent since.
         projected = self.spent_cents + action.decision.cost_cents
         if projected > self.budget_limit_cents:
