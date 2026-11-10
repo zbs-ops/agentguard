@@ -7,6 +7,7 @@ from agentguard.gate.governor import (
     ApprovalAuthError,
     GatedAction,
     Governor,
+    SameApproverError,
     SelfApprovalError,
     State,
     mint_approval_token,
@@ -16,12 +17,14 @@ from agentguard.gate.governor import (
 from agentguard.gate.ledger import ChainVerification, Entry, load_entries, verify_chain
 from agentguard.gate.policy import (
     POLICY,
+    TWO_PERSON_ABOVE_CENTS,
     UNATTENDED_WINDOW_SECONDS,
     UNATTENDED_WRITE_LIMIT,
     Budget,
     Decision,
     History,
     Verdict,
+    approvals_required,
     evaluate,
     money,
 )
@@ -29,6 +32,7 @@ from agentguard.gate.policy import (
 __all__ = [
     "APPROVAL_TTL_SECONDS",
     "POLICY",
+    "TWO_PERSON_ABOVE_CENTS",
     "UNATTENDED_WINDOW_SECONDS",
     "UNATTENDED_WRITE_LIMIT",
     "ApprovalAuthError",
@@ -39,9 +43,11 @@ __all__ = [
     "GatedAction",
     "Governor",
     "History",
+    "SameApproverError",
     "SelfApprovalError",
     "State",
     "Verdict",
+    "approvals_required",
     "evaluate",
     "load_entries",
     "mint_approval_token",
