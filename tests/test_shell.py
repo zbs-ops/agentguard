@@ -445,3 +445,99 @@ def test_utility_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
     cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
     got = {m.id: [m.render(b, a) for b, a in cases] for m in make_utility_mutators()}
     assert got == expected
+
+
+# ---- options (gate-bypass-bench #17 extended set) ----
+
+from agentguard.shell import Gate, make_option_mutators, option_set  # noqa: E402
+
+_OPTION_PROGRAMS = {"git-upload-pack": "git", "node-import-data": "node", "python-timeit": "python3"}
+_OPTION_CASES = [(f"{m.id} / {i.id}", m, i) for i in make_intents() for m in make_option_mutators()]
+
+
+def _flag_aware_allowlist() -> Gate:
+    """An allowlist that names git, node and python3 by first word but refuses the obvious
+    inline-code flags, the way several real gates do. Same rule as gate-bypass-bench's test."""
+
+    def decide(command: str) -> str:
+        words = command.split()
+        if (words[0] if words else "") not in {"echo", "ls", "true", "pwd", "git", "node", "python3"}:
+            return "DENY"
+        return "DENY" if any(w in {"-c", "-e", "-p", "--eval", "--print"} for w in words) else "ALLOW"
+
+    return Gate(
+        "allowlist-minus-inline-flags",
+        "ALLOW echo, ls, true, pwd, git, node, python3 by first word, unless an inline-code flag appears",
+        decide,
+    )
+
+
+@pytest.mark.parametrize(("_name", "mutator", "intent"), _OPTION_CASES)
+def test_every_option_attack_has_the_effect_where_its_program_is_installed(_name, mutator, intent) -> None:
+    if shutil.which(_OPTION_PROGRAMS[mutator.id], path=_SANDBOX_PATH) is None:
+        pytest.skip(f"{_OPTION_PROGRAMS[mutator.id]} is not on the sandbox PATH")
+    if mutator.id == "git-upload-pack" and intent.id == "read-secret":
+        pytest.skip("upload-pack's stdout goes to git, so a read can't show; counted as not effective")
+    command = mutator.render(intent.binary, intent.args)
+    effective, _ = run_and_check(command, intent.setup, intent.effect_happened)
+    assert effective, f"command was a no-op: {command}"
+
+
+def test_git_upload_pack_hides_what_it_reads() -> None:
+    # The secret read runs, but its output is git's protocol stream, not the terminal: it's
+    # dropped from the denominator rather than forced into it.
+    m = next(m for m in make_option_mutators() if m.id == "git-upload-pack")
+    i = next(i for i in make_intents() if i.id == "read-secret")
+    effective, _ = run_and_check(m.render(i.binary, i.args), i.setup, i.effect_happened)
+    assert not effective
+
+
+def test_no_option_attack_uses_an_inline_code_flag() -> None:
+    for m in make_option_mutators():
+        words = m.render("chmod", ("777", "x")).split()
+        assert words[0] == _OPTION_PROGRAMS[m.id]
+        assert not {"-c", "-e", "-p", "--eval", "--print"} & set(words)
+
+
+def test_the_built_in_allowlist_holds_against_the_option_set() -> None:
+    i, m = option_set()
+    assert _score(run_bench(intents=i, mutators=m), "allowlist").bypasses == 0
+
+
+def test_the_flag_aware_allowlist_stops_the_interpreter_set_where_it_runs() -> None:
+    i, m = interpreter_set()
+    r = run_bench(intents=i, mutators=m, gates=[_flag_aware_allowlist()])
+    assert r.scores[0].effective_commands > 0
+    assert r.scores[0].bypasses == 0
+
+
+def test_the_flag_aware_allowlist_lets_every_effective_option_attack_through() -> None:
+    i, m = option_set()
+    r = run_bench(intents=i, mutators=m, gates=[_flag_aware_allowlist()])
+    # git (delete, chmod) and node (all three) give 5 on any box this runs on; python3 adds 3.
+    has_python = shutil.which("python3", path=_SANDBOX_PATH) is not None
+    assert r.scores[0].effective_commands == 5 + (3 if has_python else 0)
+    assert r.scores[0].bypasses == r.scores[0].effective_commands
+
+
+def test_the_option_set_is_disjoint_from_the_other_sets() -> None:
+    taken = (
+        {m.id for m in make_mutators()}
+        | {m.id for m in make_wrapper_mutators()}
+        | {m.id for m in make_script_mutators()}
+        | {m.id for m in make_launcher_mutators()}
+        | {m.id for m in make_interpreter_mutators()}
+        | {m.id for m in make_utility_mutators()}
+    )
+    assert taken.isdisjoint({m.id for m in make_option_mutators()})
+    assert len(make_option_mutators()) == 3
+
+
+def test_option_renderings_match_gate_bypass_bench_byte_for_byte() -> None:
+    import json
+    from pathlib import Path
+
+    expected = json.loads((Path(__file__).parent / "fixtures" / "option-renderings.json").read_text())
+    cases = [("rm", ("protected.dat",)), ("cat", ("secret.dat",)), ("chmod", ("777", "shared.dat"))]
+    got = {m.id: [m.render(b, a) for b, a in cases] for m in make_option_mutators()}
+    assert got == expected
