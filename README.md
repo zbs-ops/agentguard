@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 286 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 345 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -53,6 +53,8 @@ print(g.verify().message)               # All 4 entries verify against their has
 ```
 
 Each rule here is a bug the TypeScript project found and fixed: the agent that asked can't approve its own request; typing a reviewer's name isn't enough, for a yes or a no (only the agent that asked can withdraw without one), it takes a token bound to that one action's contents (ids restart with every new Governor, so a token bound to `act_0001` alone once approved a different, bigger `act_0001`); an approval stops counting 24 hours after the request; and the budget is checked again at the moment an approved action runs, because two refunds that each fit alone can both get a yes. Ledgers are interchangeable with the TypeScript version: the same calls produce the same ledger byte for byte, hashes included (`tests/test_governor.py` checks this against a ledger the TypeScript store wrote).
+
+Above $250 (`two_person_above_cents`, by the amount the gate charges, so an understated estimate doesn't avoid it), one yes isn't enough: two different reviewers have to approve before the action runs. The first is logged as `APPROVED` with `"approval": "1 of 2"` and the action keeps waiting (`action.approvals` lists who said yes). The same reviewer again raises `SameApproverError` and writes nothing, either reviewer can still reject, and the budget and the 24-hour window are checked again at the second yes. Pass `two_person_above_cents=None` to turn it off. A 28-entry ledger agent-governance wrote for this (`tests/fixtures/governance-two-person-ledger.json`) is reproduced byte for byte.
 
 ### 2. A provenance checker: catch invented facts
 
