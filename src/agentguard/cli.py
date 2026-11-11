@@ -20,6 +20,7 @@ from collections.abc import Sequence
 from agentguard.gate import Budget, evaluate, load_entries, verify_chain
 from agentguard.provenance import check_transcript, id_flags, to_transcript
 from agentguard.shell import (
+    environment_set,
     format_report,
     interpreter_set,
     launcher_set,
@@ -80,6 +81,9 @@ def _cmd_bench(args: argparse.Namespace) -> int:
     elif args.options:
         intents, mutators = option_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.environment:
+        intents, mutators = environment_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
     return 0
@@ -138,6 +142,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--options",
         action="store_true",
         help="the option set: the command run from git --upload-pack, node --import data:, or python3 -m timeit",
+    )
+    p_bench.add_argument(
+        "--environment",
+        action="store_true",
+        help="the environment set: the command run from GIT_SSH_COMMAND, NODE_OPTIONS or PERL5OPT in front of git, node or perl",
     )
     p_bench.set_defaults(func=_cmd_bench)
 

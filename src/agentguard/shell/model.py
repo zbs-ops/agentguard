@@ -26,9 +26,11 @@ __all__ = [
     "Intent",
     "Mutator",
     "Report",
+    "environment_set",
     "format_report",
     "interpreter_set",
     "launcher_set",
+    "make_environment_mutators",
     "make_gates",
     "make_intents",
     "make_interpreter_mutators",
@@ -451,6 +453,55 @@ def utility_set() -> tuple[list[Intent], list[Mutator]]:
     attack is counted once."""
     intents = [replace(i, equivalents=()) for i in make_intents()]
     return intents, make_utility_mutators()
+
+
+def make_environment_mutators() -> list[Mutator]:
+    """Environment: the forbidden command rides in an environment variable set in front of a
+    program an allowlist names, with no inline-code flag on the command line. ``GIT_SSH_COMMAND``
+    is what git runs (through a shell) to reach an ssh remote, ``NODE_OPTIONS`` hands node an
+    ``--import`` of a ``data:`` URL, and ``PERL5OPT`` hands perl a ``-M`` that runs code. A gate
+    that skips leading ``NAME=value`` words to find the program, as shell parsers do, sees only
+    git, node or perl.
+
+    ``PERL5OPT`` splits on spaces, so the perl rendering builds the command with ``chr(32)``. As
+    with git's upload-pack, ssh's output goes to git, not the terminal, so the secret read can't
+    show and drops out of the denominator. An attack only counts where its program is installed.
+    Kept apart from ``make_mutators`` so the original 45-attack scorecard is unchanged."""
+
+    def _join(b: str, a: tuple[str, ...]) -> str:
+        return " ".join([b, *a])
+
+    def _perl_words(b: str, a: tuple[str, ...]) -> str:
+        return ",".join(f"q({w})" for w in [b, *a])
+
+    return [
+        Mutator(
+            "git-ssh-command",
+            "Run the command as the ssh program git uses for an ssh remote (GIT_SSH_COMMAND)",
+            lambda b, a: f"GIT_SSH_COMMAND='{_join(b, a)} #' git ls-remote git@example.invalid:gbb",
+        ),
+        Mutator(
+            "node-options-import",
+            "Run the command from a data: module NODE_OPTIONS tells node to import",
+            lambda b, a: (
+                "NODE_OPTIONS='--import \"data:text/javascript,import cp from \\\"node:child_process\\\"; "
+                f'cp.execSync(\\\"{_join(b, a)}\\\", {{stdio: \\\"inherit\\\"}})\"\' node /dev/null'
+            ),
+        ),
+        Mutator(
+            "perl5opt",
+            "Run the command from a -M switch PERL5OPT hands perl",
+            lambda b, a: f"PERL5OPT='-Mstrict;system(join(chr(32),{_perl_words(b, a)}))' perl /dev/null",
+        ),
+    ]
+
+
+def environment_set() -> tuple[list[Intent], list[Mutator]]:
+    """The environment set: every intent run from ``GIT_SSH_COMMAND``, ``NODE_OPTIONS`` or
+    ``PERL5OPT`` in front of git, node or perl. Equivalents are dropped, as in the other extended
+    sets, so each attack is counted once."""
+    intents = [replace(i, equivalents=()) for i in make_intents()]
+    return intents, make_environment_mutators()
 
 
 def option_set() -> tuple[list[Intent], list[Mutator]]:
