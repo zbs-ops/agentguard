@@ -24,6 +24,7 @@ from agentguard.shell import (
     format_report,
     interpreter_set,
     launcher_set,
+    manifest_set,
     option_set,
     run_bench,
     script_set,
@@ -83,6 +84,9 @@ def _cmd_bench(args: argparse.Namespace) -> int:
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     elif args.environment:
         intents, mutators = environment_set()
+        print(format_report(run_bench(intents=intents, mutators=mutators)))
+    elif args.manifests:
+        intents, mutators = manifest_set()
         print(format_report(run_bench(intents=intents, mutators=mutators)))
     else:
         print(format_report(run_bench()))
@@ -147,6 +151,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--environment",
         action="store_true",
         help="the environment set: the command run from GIT_SSH_COMMAND, NODE_OPTIONS or PERL5OPT in front of git, node or perl",
+    )
+    p_bench.add_argument(
+        "--manifests",
+        action="store_true",
+        help="the manifest set: the command written into package.json or a Makefile, then npm test, npm install or make",
     )
     p_bench.set_defaults(func=_cmd_bench)
 
