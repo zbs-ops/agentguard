@@ -577,8 +577,10 @@ def test_either_reviewer_can_still_reject_after_the_first_yes():
 
 def test_at_or_under_the_threshold_one_yes_is_enough():
     g, _ = governor()
-    assert approve_as(g, refund(g, TWO_PERSON_ABOVE_CENTS).id, HUMAN).state is State.EXECUTED
-    assert approve_as(g, refund(g, 12_400).id, HUMAN).state is State.EXECUTED
+    # Different orders: two refunds to the same target would add up (see the split tests below).
+    for cents, order in ((TWO_PERSON_ABOVE_CENTS, "T-1"), (12_400, "T-2")):
+        a = g.propose("billing-agent", "refund.create", {"amount_cents": cents, "order": order}, estimated_cost_cents=cents)
+        assert approve_as(g, a.id, HUMAN).state is State.EXECUTED
 
 
 def test_an_understated_estimate_does_not_skip_the_second_person():
