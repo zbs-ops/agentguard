@@ -624,7 +624,8 @@ def _replay_typescript_two_person_run() -> tuple[Governor, str]:
     """The calls agent-governance's store made for the two-person fixture: its six seed actions,
     an understated $300 refund approved by one reviewer and rejected by the other, a $300 refund
     approved twice by the same reviewer (the second refused) and then by finance, and a $200
-    refund on one approval."""
+    refund for the same customer, which waits for a second person (the $300 already went to that
+    customer; regenerated from agent-governance main d20b9a8, where payments to one customer add up)."""
     from datetime import datetime, timezone
 
     clock = Clock(datetime(2026, 11, 10, 9, 0, tzinfo=timezone.utc).timestamp())

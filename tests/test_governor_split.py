@@ -92,8 +92,10 @@ def test_switching_the_two_person_rule_off_switches_this_off_too():
 
 def _replay_typescript_split_run() -> Governor:
     """The calls agent-governance's store made for the split fixture: its six seed actions, $200 to
-    order SP-1 on one yes, $100 more to SP-1 (you, then finance), $150 to SP-2 on one yes, and $50
-    more to SP-1 from another agent that finance rejects after your yes."""
+    order SP-1 on one yes, $100 more to SP-1 (you, then finance), $150 to SP-2 for the same
+    customer (waits for a second person, since $300 already went to that customer), and $50 more to
+    SP-1 from another agent that finance rejects after your yes. Regenerated from agent-governance
+    main d20b9a8."""
     clock = Clock(datetime(2026, 11, 17, 9, 0, tzinfo=timezone.utc).timestamp())
     g = Governor(reviewer_keys=KEYS, clock=clock)
     g.propose("support-agent", "crm.read", {"customer": "acme-industries"})
