@@ -361,14 +361,21 @@ class Governor:
 
     def _sent_to_same_target(self, action: GatedAction) -> int:
         """What has already been paid out to the same target as ``action`` within the approval
-        window: actions with the same tool and the same arguments apart from the amount, by any
-        agent, that ran. Waiting, rejected and blocked ones moved no money and don't count."""
+        window, by any agent: actions that ran and share an order, invoice, customer, account or
+        recipient with it (``TARGET_KEYS``), whatever tool or other details they used. With no
+        such identifier, only an exact repeat of the tool and the other arguments counts. Waiting,
+        rejected and blocked actions moved no money and don't count."""
+        mine = _target_ids(action.args)
 
-        def target(a: GatedAction) -> str:
+        def exact(a: GatedAction) -> str:
             rest = {k: v for k, v in a.args.items() if k != "amount_cents"}
             return _canonical({"tool": a.tool, "args": rest})
 
-        key = target(action)
+        key = exact(action)
+
+        def same_target(a: GatedAction) -> bool:
+            return exact(a) == key if not mine else bool(mine & _target_ids(a.args))
+
         return sum(
             a.decision.cost_cents
             for a in self._actions
@@ -376,7 +383,7 @@ class Governor:
             and a.state is State.EXECUTED
             and a.decision.cost_cents > 0
             and action.created_at - a.created_at < self.approval_ttl_seconds
-            and target(a) == key
+            and same_target(a)
         )
 
     def _recent_unattended_writes(self, agent: str, now: float) -> int:
@@ -411,6 +418,43 @@ def _money_or_raw(cents: object) -> object:
     if isinstance(cents, int) and not isinstance(cents, bool):
         return money(cents)
     return repr(cents)
+
+
+#: Argument names that say who or what a payment goes to. Payments that share one of these
+#: (compared without case or surrounding spaces) go to the same target for the two-person rule,
+#: so a reason, a note, a request id or a different refund tool doesn't make a split look separate.
+TARGET_KEYS = (
+    "order",
+    "order_id",
+    "invoice",
+    "invoice_id",
+    "customer",
+    "customer_id",
+    "account",
+    "account_id",
+    "charge",
+    "charge_id",
+    "payment_intent",
+    "subscription",
+    "user",
+    "user_id",
+    "to",
+    "recipient",
+    "payee",
+)
+
+
+def _target_ids(args: Mapping[str, Any]) -> set[str]:
+    """``key=value`` for each target identifier in some arguments, normalised the way
+    agent-governance does: strings trimmed and lower-cased, finite numbers as JavaScript prints them."""
+    ids: set[str] = set()
+    for k in TARGET_KEYS:
+        v = args.get(k)
+        if isinstance(v, str) and v.strip():
+            ids.add(f"{k}={v.strip().lower()}")
+        elif isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
+            ids.add(f"{k}={int(v) if float(v).is_integer() else v}")
+    return ids
 
 
 def _hours(seconds: float) -> str:
