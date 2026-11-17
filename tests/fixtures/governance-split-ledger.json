@@ -1,7 +1,7 @@
 {
-  "source": "agent-governance main 86b1509, frozen clock 2026-11-17T09:00:00.000Z",
+  "source": "agent-governance main d20b9a8, frozen clock 2026-11-17T09:00:00.000Z",
   "budget": {
-    "spentCents": 45000,
+    "spentCents": 30000,
     "limitCents": 50000
   },
   "states": [
@@ -58,9 +58,11 @@
     ],
     [
       "act_0009",
-      "EXECUTED",
+      "PENDING_APPROVAL",
       "large-single-spend",
-      null
+      [
+        "you@company.com"
+      ]
     ],
     [
       "act_0010",
@@ -425,24 +427,13 @@
       "actor": "you@company.com",
       "proposalId": "act_0009",
       "detail": {
-        "note": "ok"
+        "note": "ok",
+        "approval": "1 of 2",
+        "why": "$300.00 already went to the same target in the last 24h; with this $150.00 it passes the $250.00 two-person line."
       },
       "seq": 27,
       "prevHash": "86f22a5b3162878a4dd68bc5a37b9f14916e7c9382c17c038ad2944e81f52e75",
-      "hash": "29842b03452f726c2be5fcfede3cad25c103d260fb0ff5fd85fa57c9a06a7d14"
-    },
-    {
-      "at": "2026-11-17T09:00:00.000Z",
-      "event": "EXECUTED",
-      "actor": "runtime",
-      "proposalId": "act_0009",
-      "detail": {
-        "tool": "refund.create",
-        "cost": "$150.00"
-      },
-      "seq": 28,
-      "prevHash": "29842b03452f726c2be5fcfede3cad25c103d260fb0ff5fd85fa57c9a06a7d14",
-      "hash": "3ee28d1ef1a70539ae378bc695d7a12cdee32846c392399e109e1a3cc762ec26"
+      "hash": "a09250cfb3057c33a5c87dcfd5562cd234f925034dbf9bb76b9ec2127542d5e7"
     },
     {
       "at": "2026-11-17T09:00:00.000Z",
@@ -453,9 +444,9 @@
         "tool": "refund.create",
         "estimated": "$50.00"
       },
-      "seq": 29,
-      "prevHash": "3ee28d1ef1a70539ae378bc695d7a12cdee32846c392399e109e1a3cc762ec26",
-      "hash": "83b6c34727a4469d667589d8648a856dec12ea6f9dedcd0f9756eecc2e823ad9"
+      "seq": 28,
+      "prevHash": "a09250cfb3057c33a5c87dcfd5562cd234f925034dbf9bb76b9ec2127542d5e7",
+      "hash": "4f582ad078b013054a5b05e30d200715e1a39c35201c622ee60a508d843e4094"
     },
     {
       "at": "2026-11-17T09:00:00.000Z",
@@ -467,9 +458,9 @@
         "tier": 3,
         "decidedBy": "money-movement"
       },
-      "seq": 30,
-      "prevHash": "83b6c34727a4469d667589d8648a856dec12ea6f9dedcd0f9756eecc2e823ad9",
-      "hash": "f23486992aca6011de57d694a736669c5efd65b25e494d6e685d8160860b45bf"
+      "seq": 29,
+      "prevHash": "4f582ad078b013054a5b05e30d200715e1a39c35201c622ee60a508d843e4094",
+      "hash": "41ec6c476b56118d0f38ae7bac66a01e729e72daaeccbb80c3d1063cd50db909"
     },
     {
       "at": "2026-11-17T09:00:00.000Z",
@@ -481,9 +472,9 @@
         "approval": "1 of 2",
         "why": "$300.00 already went to the same target in the last 24h; with this $50.00 it passes the $250.00 two-person line."
       },
-      "seq": 31,
-      "prevHash": "f23486992aca6011de57d694a736669c5efd65b25e494d6e685d8160860b45bf",
-      "hash": "ef3250de48d23fbf71fe0a7e373f4f305bf8d75ecc435099629d8bda6bbfd394"
+      "seq": 30,
+      "prevHash": "41ec6c476b56118d0f38ae7bac66a01e729e72daaeccbb80c3d1063cd50db909",
+      "hash": "0ad53fae992138cbb7accfeeafb6bb4aaa7e1675288eb03b3e4681966ab39636"
     },
     {
       "at": "2026-11-17T09:00:00.000Z",
@@ -493,9 +484,9 @@
       "detail": {
         "note": "no"
       },
-      "seq": 32,
-      "prevHash": "ef3250de48d23fbf71fe0a7e373f4f305bf8d75ecc435099629d8bda6bbfd394",
-      "hash": "ee5c0069687b36d8085d8a04ecd6d458a6fdc92c85922d6d5448cb8a63eb6bb5"
+      "seq": 31,
+      "prevHash": "0ad53fae992138cbb7accfeeafb6bb4aaa7e1675288eb03b3e4681966ab39636",
+      "hash": "5de487becf85d3eac5254b9f79896c128dbb1b046388fb6beb17a5075b45d0ad"
     }
   ]
 }
