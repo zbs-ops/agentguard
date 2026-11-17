@@ -15,7 +15,8 @@ The rules carried over from ``agent-governance``, each one a bug that project fi
   actions may have spent while it waited.
 - A loop of unattended writes from one agent gets slowed down to "ask a person".
 - Above a threshold (``two_person_above_cents``, $250 by default), an action needs two
-  different reviewers before it runs.
+  different reviewers before it runs. Payments to the same target add up within the approval
+  window, so splitting one into smaller ones doesn't avoid the second reviewer.
 """
 
 from __future__ import annotations
@@ -283,8 +284,19 @@ class Governor:
             raise ApprovalAuthError(f"{reviewer!r} did not present a valid token for this decision.")
 
         # A large action needs two different people. Refusing a repeat yes here, before anything
-        # is written, means one reviewer approving twice changes nothing.
-        two_person = approve and approvals_required(action.decision, self.two_person_above_cents) == 2
+        # is written, means one reviewer approving twice changes nothing. "Large" counts what
+        # already went to the same target within the approval window, so a $300 refund sent as
+        # $200 then $100 still needs two people for the part that crosses the line.
+        limit = self.two_person_above_cents
+        sent = self._sent_to_same_target(action) if approve and limit is not None else 0
+        split = limit is not None and sent > 0 and sent + action.decision.cost_cents > limit
+        two_person = approve and (approvals_required(action.decision, limit) == 2 or split)
+        split_why = (
+            f"{money(sent)} already went to the same target in the last {_hours(self.approval_ttl_seconds)}h; "
+            f"with this {money(action.decision.cost_cents)} it passes the {money(limit or 0)} two-person line."
+            if split
+            else None
+        )
         if two_person and any(_norm(r) == _norm(reviewer) for r in action.approvals or []):
             raise SameApproverError(f'"{reviewer}" already approved this. It needs a second, different person.')
 
@@ -308,13 +320,15 @@ class Governor:
 
         if two_person:
             action.approvals = [*(action.approvals or []), reviewer]
-            approval = f"{len(action.approvals)} of 2"
+            detail: dict[str, Any] = {"note": note, "approval": f"{len(action.approvals)} of 2"}
+            if split_why:
+                detail["why"] = split_why
             if len(action.approvals) < 2:
                 # The first yes is on the record, but the action keeps waiting for a second person.
-                self._record("APPROVED", reviewer, action_id, {"note": note, "approval": approval})
+                self._record("APPROVED", reviewer, action_id, detail)
                 return action
             action.state = State.APPROVED
-            self._record("APPROVED", reviewer, action_id, {"note": note, "approval": approval})
+            self._record("APPROVED", reviewer, action_id, detail)
         else:
             action.state = State.APPROVED
             self._record("APPROVED", reviewer, action_id, {"note": note})
@@ -344,6 +358,26 @@ class Governor:
             ):
                 return a.id, a.state.value
         return None
+
+    def _sent_to_same_target(self, action: GatedAction) -> int:
+        """What has already been paid out to the same target as ``action`` within the approval
+        window: actions with the same tool and the same arguments apart from the amount, by any
+        agent, that ran. Waiting, rejected and blocked ones moved no money and don't count."""
+
+        def target(a: GatedAction) -> str:
+            rest = {k: v for k, v in a.args.items() if k != "amount_cents"}
+            return _canonical({"tool": a.tool, "args": rest})
+
+        key = target(action)
+        return sum(
+            a.decision.cost_cents
+            for a in self._actions
+            if a is not action
+            and a.state is State.EXECUTED
+            and a.decision.cost_cents > 0
+            and action.created_at - a.created_at < self.approval_ttl_seconds
+            and target(a) == key
+        )
 
     def _recent_unattended_writes(self, agent: str, now: float) -> int:
         return sum(
