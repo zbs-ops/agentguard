@@ -3,8 +3,9 @@
 0.16.0 matched a target by the exact argument name, so the same order written another way looked
 like a different target and the second part of a split ran on one approval: ``order`` then
 ``order_id``, camelCase names (``orderId``, which also fell back to the exact match so a new reason
-slipped through), or a capitalised name. A name is now read by what it names. The fixture was
-written by agent-governance main with a frozen clock: the kind it reads for each tricky name.
+slipped through), a capitalised name, or the order inside a nested object or a list. A name is
+now read by what it names, and nested arguments are read too. The fixture was written by
+agent-governance main with a frozen clock: the kind it reads for each tricky name.
 """
 
 from __future__ import annotations
@@ -68,11 +69,37 @@ def test_the_same_target_under_another_name_still_needs_a_second_person(first, s
 @pytest.mark.parametrize(
     ("first", "second"),
     [
+        ({"order": "T-1"}, {"target": {"order": "T-1"}}),
+        ({"customer": "acme"}, {"customer": {"id": "acme", "name": "Acme"}}),
+        ({"order": "T-1"}, {"order": ["T-1"]}),
+        ({"order": "T-1"}, {"items": [{"orderId": "T-1", "sku": "x"}]}),
+        ({"order": "T-1"}, {"order": ("T-1",)}),
+    ],
+)
+def test_the_same_target_inside_nested_arguments_still_needs_a_second_person(first, second):
+    assert second_part(first, second) is State.PENDING_APPROVAL
+
+
+@pytest.mark.parametrize("depth", [30, 31, 32, 33])
+def test_nesting_is_read_as_deep_as_agent_governance_reads_it(depth):
+    """agent-governance reads an order nested 30 or 31 levels down and stops below that."""
+    nested: dict = {"order": "T-1"}
+    for _ in range(depth):
+        nested = {"n": nested}
+    expected = State.PENDING_APPROVAL if depth <= 31 else State.EXECUTED
+    assert second_part({"order": "T-1"}, nested) is expected
+
+
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [
         ({"order": "T-1"}, {"orderId": "T-2"}),
         ({"order": "42"}, {"invoice": "42"}),
         ({"order": "T-1"}, {"paid": "T-1"}),
         ({"to": "acme"}, {"photo": "acme"}),
         ({"order": "T-1"}, {"product_code": "T-1"}),
+        ({"order": "T-1"}, {"meta": {"batch": "T-1"}}),
+        ({"customer": "acme"}, {"product": {"id": "acme"}}),
     ],
 )
 def test_different_targets_stay_separate(first, second):

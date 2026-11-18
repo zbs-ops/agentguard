@@ -462,16 +462,27 @@ def target_kind(name: str) -> str | None:
 
 def _target_ids(args: Mapping[str, Any]) -> set[str]:
     """``kind=value`` for each target identifier in some arguments, normalised the way
-    agent-governance does: strings trimmed and lower-cased, finite numbers as JavaScript prints them."""
+    agent-governance does: strings trimmed and lower-cased, finite numbers as JavaScript prints them.
+    Nested objects and lists are read too, to the same depth (32), and inside a target's own object
+    an ``id`` names that target (``{"customer": {"id": "acme"}}``)."""
     ids: set[str] = set()
-    for k, v in args.items():
-        kind = target_kind(str(k))
-        if kind is None:
-            continue
-        if isinstance(v, str) and v.strip():
-            ids.add(f"{kind}={v.strip().lower()}")
-        elif isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
-            ids.add(f"{kind}={int(v) if float(v).is_integer() else v}")
+
+    def walk(value: Any, kind: str | None, depth: int) -> None:
+        if depth > 32:
+            return
+        if isinstance(value, (list, tuple)):
+            for v in value:
+                walk(v, kind, depth + 1)
+        elif isinstance(value, Mapping):
+            for k, v in value.items():
+                name = str(k)
+                walk(v, target_kind(name) or (kind if name.lower() == "id" else None), depth + 1)
+        elif kind and isinstance(value, str) and value.strip():
+            ids.add(f"{kind}={value.strip().lower()}")
+        elif kind and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
+            ids.add(f"{kind}={int(value) if float(value).is_integer() else value}")
+
+    walk(args, None, 0)
     return ids
 
 
