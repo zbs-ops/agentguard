@@ -27,6 +27,7 @@ import json
 import math
 import re
 import time
+import unicodedata
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
@@ -460,6 +461,22 @@ def target_kind(name: str) -> str | None:
     return words[-1] if words and words[-1] in TARGET_KINDS else None
 
 
+#: What JavaScript's ``String.prototype.trim`` removes (WhiteSpace and LineTerminator). Python's
+#: ``str.strip()`` also removes U+001C-U+001F and U+0085, which agent-governance keeps.
+_JS_SPACE = "\t\n\v\f\r                  　﻿"
+_EMAIL_TAG = re.compile(r"\+[^@]*@")
+
+
+def _id_value(value: str, kind: str) -> str:
+    """An identifier as agent-governance compares it: NFKC-normalised (a full-width "２" is "2"),
+    invisible format characters (category Cf) dropped, every dash (Pd) read as "-", trimmed as
+    JavaScript trims and lower-cased; an email's ``+tag`` is dropped (it reaches the same mailbox)."""
+    text = unicodedata.normalize("NFKC", value)
+    text = "".join("-" if unicodedata.category(c) == "Pd" else c for c in text if unicodedata.category(c) != "Cf")
+    text = text.strip(_JS_SPACE).lower()
+    return _EMAIL_TAG.sub("@", text, count=1) if kind == "email" else text
+
+
 def _target_ids(args: Mapping[str, Any]) -> set[str]:
     """``kind=value`` for each target identifier in some arguments, normalised the way
     agent-governance does: strings trimmed and lower-cased, finite numbers as JavaScript prints them.
@@ -477,8 +494,8 @@ def _target_ids(args: Mapping[str, Any]) -> set[str]:
             for k, v in value.items():
                 name = str(k)
                 walk(v, target_kind(name) or (kind if name.lower() == "id" else None), depth + 1)
-        elif kind and isinstance(value, str) and value.strip():
-            ids.add(f"{kind}={value.strip().lower()}")
+        elif kind and isinstance(value, str) and _id_value(value, kind):
+            ids.add(f"{kind}={_id_value(value, kind)}")
         elif kind and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
             ids.add(f"{kind}={int(value) if float(value).is_integer() else value}")
 
