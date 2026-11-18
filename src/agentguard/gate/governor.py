@@ -25,6 +25,7 @@ import hashlib
 import hmac
 import json
 import math
+import re
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
@@ -362,7 +363,7 @@ class Governor:
     def _sent_to_same_target(self, action: GatedAction) -> int:
         """What has already been paid out to the same target as ``action`` within the approval
         window, by any agent: actions that ran and share an order, invoice, customer, account or
-        recipient with it (``TARGET_KEYS``), whatever tool or other details they used. With no
+        recipient with it (``TARGET_KINDS``), whatever tool or other details they used. With no
         such identifier, only an exact repeat of the tool and the other arguments counts. Waiting,
         rejected and blocked actions moved no money and don't count."""
         mine = _target_ids(action.args)
@@ -420,40 +421,57 @@ def _money_or_raw(cents: object) -> object:
     return repr(cents)
 
 
-#: Argument names that say who or what a payment goes to. Payments that share one of these
-#: (compared without case or surrounding spaces) go to the same target for the two-person rule,
-#: so a reason, a note, a request id or a different refund tool doesn't make a split look separate.
-TARGET_KEYS = (
+#: What a payment can go to. Payments that share one of these (compared without case or
+#: surrounding spaces) go to the same target for the two-person rule, so a reason, a note, a
+#: request id or a different refund tool doesn't make a split look separate. An argument names one
+#: when its name, read as words without a trailing id word, is on this list (see ``target_kind``).
+TARGET_KINDS = (
     "order",
-    "order_id",
     "invoice",
-    "invoice_id",
     "customer",
-    "customer_id",
     "account",
-    "account_id",
     "charge",
-    "charge_id",
-    "payment_intent",
+    "paymentintent",
     "subscription",
     "user",
-    "user_id",
     "to",
     "recipient",
     "payee",
+    "email",
 )
+
+#: Words after a target's name that still name it: ``order_id``, ``orderNumber``, ``email_address``.
+_ID_WORDS = frozenset({"id", "number", "no", "num", "ref", "reference", "code", "address"})
+_CAMEL = re.compile(r"([a-z0-9])([A-Z])")
+_NOT_WORD = re.compile(r"[^a-z0-9]+")
+
+
+def target_kind(name: str) -> str | None:
+    """The kind of target an argument name names, as agent-governance's ``targetKind`` reads it:
+    split into words (snake_case, kebab-case, dotted or camelCase), trailing id words dropped, and
+    the rest joined (``paymentIntentId`` → ``paymentintent``) or its last word must be a kind.
+    ``order``, ``order_id``, ``orderId``, ``ORDER_ID`` and ``orderNumber`` all name the order."""
+    words = [w for w in _NOT_WORD.split(_CAMEL.sub(r"\1 \2", name).lower()) if w]
+    while len(words) > 1 and words[-1] in _ID_WORDS:
+        words.pop()
+    joined = "".join(words)
+    if joined in TARGET_KINDS:
+        return joined
+    return words[-1] if words and words[-1] in TARGET_KINDS else None
 
 
 def _target_ids(args: Mapping[str, Any]) -> set[str]:
-    """``key=value`` for each target identifier in some arguments, normalised the way
+    """``kind=value`` for each target identifier in some arguments, normalised the way
     agent-governance does: strings trimmed and lower-cased, finite numbers as JavaScript prints them."""
     ids: set[str] = set()
-    for k in TARGET_KEYS:
-        v = args.get(k)
+    for k, v in args.items():
+        kind = target_kind(str(k))
+        if kind is None:
+            continue
         if isinstance(v, str) and v.strip():
-            ids.add(f"{k}={v.strip().lower()}")
+            ids.add(f"{kind}={v.strip().lower()}")
         elif isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
-            ids.add(f"{k}={int(v) if float(v).is_integer() else v}")
+            ids.add(f"{kind}={int(v) if float(v).is_integer() else v}")
     return ids
 
 
