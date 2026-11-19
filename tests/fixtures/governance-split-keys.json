@@ -1,5 +1,5 @@
 {
-  "source": "agent-governance main 5c02579, frozen clock 2026-11-18T12:00:00.000Z",
+  "source": "agent-governance main b815c30, frozen clock 2026-11-18T12:00:00.000Z",
   "kinds": [
     [
       "order",
@@ -115,7 +115,7 @@
     ],
     [
       "user_name",
-      null
+      "user"
     ],
     [
       "username",
@@ -559,7 +559,7 @@
         "email": "odd@"
       },
       "EXECUTED",
-      "PENDING_APPROVAL"
+      "EXECUTED"
     ],
     [
       {

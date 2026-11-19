@@ -439,10 +439,41 @@ TARGET_KINDS = (
     "recipient",
     "payee",
     "email",
+    # Where a payout goes. Left out on purpose, because they'd add up payments to different people:
+    # ``client`` (``client_id`` is usually the app's own credential), ``routing`` (a bank, not an account)
+    # and a bare ``address`` (often a postal address; ``wallet_address`` still counts).
+    "vendor",
+    "merchant",
+    "supplier",
+    "beneficiary",
+    "employee",
+    "contractor",
+    "counterparty",
+    "member",
+    "destination",
+    "iban",
+    "card",
+    "wallet",
+    "phone",
+    "paypal",
 )
 
-#: Words after a target's name that still name it: ``order_id``, ``orderNumber``, ``email_address``.
-_ID_WORDS = frozenset({"id", "number", "no", "num", "ref", "reference", "code", "address"})
+#: Kinds that say who gets paid. They share one namespace, so the same value under any two of them
+#: (``to`` then ``recipient``, ``payee`` then ``vendor``, an IBAN then a bank account) is the same
+#: target. The other kinds (order, invoice, charge, payment intent, subscription) say what a payment
+#: is for and keep one namespace each, so order 42 and invoice 42 stay apart.
+_PAYEE_KINDS = frozenset(
+    {
+        *("customer", "account", "user", "to", "recipient", "payee", "email", "vendor", "merchant"),
+        *("supplier", "beneficiary", "employee", "contractor", "counterparty", "member", "destination"),
+        *("iban", "card", "wallet", "phone", "paypal"),
+    }
+)
+#: Kinds whose values are numbers people format with spaces, dashes, dots or brackets.
+_NUMBER_KINDS = frozenset({"account", "destination", "iban", "card", "phone"})
+
+#: Words after a target's name that still name it: ``order_id``, ``orderNumber``, ``vendor_name``.
+_ID_WORDS = frozenset({"id", "number", "no", "num", "ref", "reference", "code", "address", "name"})
 _CAMEL = re.compile(r"([a-z0-9])([A-Z])")
 _NOT_WORD = re.compile(r"[^a-z0-9]+")
 
@@ -465,16 +496,27 @@ def target_kind(name: str) -> str | None:
 #: ``str.strip()`` also removes U+001C-U+001F and U+0085, which agent-governance keeps.
 _JS_SPACE = "\t\n\v\f\r                  　﻿"
 _EMAIL_TAG = re.compile(r"\+[^@]*@")
+# JavaScript's ``\s`` is the same set as its trim, which differs from Python's ``\s``.
+_NUMBER_FORMATTING = re.compile("[" + re.escape(_JS_SPACE) + r".()-]")
+_EMAIL_SHAPE = re.compile("^[^@" + re.escape(_JS_SPACE) + "]+@[^@" + re.escape(_JS_SPACE) + "]+$")
 
 
 def _id_value(value: str, kind: str) -> str:
     """An identifier as agent-governance compares it: NFKC-normalised (a full-width "２" is "2"),
     invisible format characters (category Cf) dropped, every dash (Pd) read as "-", trimmed as
-    JavaScript trims and lower-cased; an email's ``+tag`` is dropped (it reaches the same mailbox)."""
+    JavaScript trims and lower-cased. Account, card and phone numbers lose their spaces, dashes, dots
+    and brackets; a payee value shaped like an email address loses its ``+tag`` (it reaches the same
+    mailbox)."""
     text = unicodedata.normalize("NFKC", value)
     text = "".join("-" if unicodedata.category(c) == "Pd" else c for c in text if unicodedata.category(c) != "Cf")
     text = text.strip(_JS_SPACE).lower()
-    return _EMAIL_TAG.sub("@", text, count=1) if kind == "email" else text
+    if kind in _NUMBER_KINDS:
+        return _NUMBER_FORMATTING.sub("", text)
+    return _EMAIL_TAG.sub("@", text, count=1) if kind in _PAYEE_KINDS and _EMAIL_SHAPE.match(text) else text
+
+
+def _namespace(kind: str) -> str:
+    return "payee" if kind in _PAYEE_KINDS else kind
 
 
 def _target_ids(args: Mapping[str, Any]) -> set[str]:
@@ -495,9 +537,9 @@ def _target_ids(args: Mapping[str, Any]) -> set[str]:
                 name = str(k)
                 walk(v, target_kind(name) or (kind if name.lower() == "id" else None), depth + 1)
         elif kind and isinstance(value, str) and _id_value(value, kind):
-            ids.add(f"{kind}={_id_value(value, kind)}")
+            ids.add(f"{_namespace(kind)}={_id_value(value, kind)}")
         elif kind and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
-            ids.add(f"{kind}={int(value) if float(value).is_integer() else value}")
+            ids.add(f"{_namespace(kind)}={int(value) if float(value).is_integer() else value}")
 
     walk(args, None, 0)
     return ids
