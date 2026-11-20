@@ -1,0 +1,2543 @@
+{
+  "source": "agent-governance main e0ebfe5, frozen clock 2026-11-20T12:00:00.000Z",
+  "budget": {
+    "spentCents": 0,
+    "limitCents": 50000
+  },
+  "cases": [
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount_cents": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amountCents": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "AMOUNT_CENTS": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount": 300
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount_usd": 300
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount_usd). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount_in_cents": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "cents": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "total": 300
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (total). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "value": 300
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (value). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount_cents": "30000"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move 30000 cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount": {
+          "value": 30000,
+          "currency": "usd"
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount.value). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "money": {
+          "amount_cents": 30000
+        }
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "refund": {
+          "amount_cents": 30000
+        }
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "items": [
+          {
+            "amount_cents": 20000
+          },
+          {
+            "amount_cents": 10000
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 30000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $300.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "invoice": "R4-1",
+        "amount_cents": 100,
+        "amount": 300
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "total_cents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount-in-cents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount.cents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "Cents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "centsAmount": 500
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (centsAmount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "cents_total": 500
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (cents_total). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amountcents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "totalcents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amountincents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "AMOUNTCENTS": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "percents": 15
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 15,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $0.15 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amountusd": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amountusd). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "totalamount": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (totalamount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "unitprice": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (unitprice). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "grandtotal": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (grandtotal). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "totalcount": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (totalcount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "consumer": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "summary": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "valueset": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "İamount": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (İamount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amountΣcents": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 3,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $0.03 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "ÅngstromCents": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 3,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $0.03 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "unit_price_cents": 1000,
+        "qty": 30
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 1000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $10.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amountUSD": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amountUSD). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "TotalAmount": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (TotalAmount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "pricing": 3
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "valueDate": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (valueDate). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "sum_total": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (sum_total). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount_count": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount_count). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": 0
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": -5
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": 1.5
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": true
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": null
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "stripe.refund",
+      "estimate": 0,
+      "args": {
+        "amount": [
+          300
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "300"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": " 300 "
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": " 300　"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "300"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "$1,000.50"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "+3"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "-3"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "3."
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": ".5"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "1e3"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "٣٠٠"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "３００"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": "USD 300"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "amount": ""
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "value": "vip"
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": -1
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move -1 cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": 1.5
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move 1.5 cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": 1
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 1,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $0.01 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": null
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move null cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": true
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move true cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": false
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move false cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": [
+          1,
+          2
+        ]
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move 1,2 cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": {
+          "v": 1
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move [object Object] cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": 9007199254740991
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "budget-exceeded",
+      "costCents": 9007199254740991,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "This would put spend at $90071992547409.91 against a $500.00 cap."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": 9007199254740992
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move 9007199254740992 cents, which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "cents": "x"
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move x cents (cents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "money": {
+          "amountCents": -2
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move -2 cents (money.amountCents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount_cents": 1
+          },
+          {
+            "amount_cents": "two"
+          }
+        ]
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move two cents (items[1].amount_cents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "a": {
+          "cents": -1
+        },
+        "b": {
+          "cents": "y"
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move -1 cents (a.cents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "a": {
+          "cents": "y"
+        },
+        "b": {
+          "cents": -1
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move y cents (a.cents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "1": {
+          "cents": "y"
+        },
+        "2": {
+          "cents": -1
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments ask to move y cents (1.cents), which is not a whole, non-negative amount."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "2": {
+          "value": 5
+        },
+        "10": {
+          "amount": 3
+        },
+        "b": 1,
+        "a": {
+          "total": 4
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (2.value, 10.amount, a.total). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount_cents": 9000
+          },
+          {
+            "amount_cents": 9000
+          },
+          {
+            "amount_cents": 9000
+          },
+          {
+            "amount_cents": 9000
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 36000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $360.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount_cents": 20000
+          },
+          {
+            "other": {
+              "amount_cents": 20000
+            }
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 20000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $200.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          [
+            {
+              "amount_cents": 20000
+            }
+          ],
+          [
+            {
+              "amount_cents": 15000
+            }
+          ]
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 20000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $200.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "a": [
+          {
+            "cents": 100
+          },
+          {
+            "cents": 200
+          }
+        ],
+        "b": [
+          {
+            "cents": 250
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 300,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $3.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "amount_cents": 40000,
+        "items": [
+          {
+            "amount_cents": 20000
+          },
+          {
+            "amount_cents": 10000
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 40000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $400.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount_cents": 9007199254740991
+          },
+          {
+            "amount_cents": 1
+          }
+        ]
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The line items under items add up to more cents than can be counted."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount_cents": 1,
+            "amountCents": 2
+          }
+        ]
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 3,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $0.03 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": []
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "money-movement",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "Tier 3 always waits for a human."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "items": [
+          {
+            "amount": 3
+          }
+        ]
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (items[0].amount). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "n": {
+          "n": {
+            "n": {
+              "n": {
+                "n": {
+                  "n": {
+                    "n": {
+                      "n": {
+                        "n": {
+                          "n": {
+                            "n": {
+                              "n": {
+                                "n": {
+                                  "n": {
+                                    "n": {
+                                      "n": {
+                                        "n": {
+                                          "n": {
+                                            "n": {
+                                              "n": {
+                                                "n": {
+                                                  "n": {
+                                                    "n": {
+                                                      "n": {
+                                                        "n": {
+                                                          "n": {
+                                                            "n": {
+                                                              "n": {
+                                                                "n": {
+                                                                  "n": {
+                                                                    "n": {
+                                                                      "cents": 700
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 700,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $7.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "n": {
+          "n": {
+            "n": {
+              "n": {
+                "n": {
+                  "n": {
+                    "n": {
+                      "n": {
+                        "n": {
+                          "n": {
+                            "n": {
+                              "n": {
+                                "n": {
+                                  "n": {
+                                    "n": {
+                                      "n": {
+                                        "n": {
+                                          "n": {
+                                            "n": {
+                                              "n": {
+                                                "n": {
+                                                  "n": {
+                                                    "n": {
+                                                      "n": {
+                                                        "n": {
+                                                          "n": {
+                                                            "n": {
+                                                              "n": {
+                                                                "n": {
+                                                                  "n": {
+                                                                    "n": {
+                                                                      "n": {
+                                                                        "cents": 700
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 700,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $7.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "n": {
+          "n": {
+            "n": {
+              "n": {
+                "n": {
+                  "n": {
+                    "n": {
+                      "n": {
+                        "n": {
+                          "n": {
+                            "n": {
+                              "n": {
+                                "n": {
+                                  "n": {
+                                    "n": {
+                                      "n": {
+                                        "n": {
+                                          "n": {
+                                            "n": {
+                                              "n": {
+                                                "n": {
+                                                  "n": {
+                                                    "n": {
+                                                      "n": {
+                                                        "n": {
+                                                          "n": {
+                                                            "n": {
+                                                              "n": {
+                                                                "n": {
+                                                                  "n": {
+                                                                    "n": {
+                                                                      "n": {
+                                                                        "n": {
+                                                                          "cents": 700
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments are nested more than 32 levels deep, too deep to price."
+      ]
+    },
+    {
+      "tool": "crm.read",
+      "estimate": 0,
+      "args": {
+        "n": {
+          "n": {
+            "n": {
+              "n": {
+                "n": {
+                  "n": {
+                    "n": {
+                      "n": {
+                        "n": {
+                          "n": {
+                            "n": {
+                              "n": {
+                                "n": {
+                                  "n": {
+                                    "n": {
+                                      "n": {
+                                        "n": {
+                                          "n": {
+                                            "n": {
+                                              "n": {
+                                                "n": {
+                                                  "n": {
+                                                    "n": {
+                                                      "n": {
+                                                        "n": {
+                                                          "n": {
+                                                            "n": {
+                                                              "n": {
+                                                                "n": {
+                                                                  "n": {
+                                                                    "n": {
+                                                                      "n": {
+                                                                        "n": {
+                                                                          "n": {
+                                                                            "n": {
+                                                                              "n": {
+                                                                                "n": {
+                                                                                  "n": {
+                                                                                    "n": {
+                                                                                      "n": {
+                                                                                        "x": 1
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "verdict": "DENY",
+      "tier": 1,
+      "decidedBy": "malformed-cost",
+      "costCents": 0,
+      "reasons": [
+        "Read-only lookups cannot change anything, so they run unattended.",
+        "The arguments are nested more than 32 levels deep, too deep to price."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 50000,
+      "args": {
+        "cents": 30000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "large-single-spend",
+      "costCents": 50000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "$500.00 in one action is unusually large — escalated for review."
+      ]
+    },
+    {
+      "tool": "refund.issue",
+      "estimate": 0,
+      "args": {
+        "cents": 60000
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "budget-exceeded",
+      "costCents": 60000,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "This would put spend at $600.00 against a $500.00 cap."
+      ]
+    },
+    {
+      "tool": "crm.update",
+      "estimate": 0,
+      "args": {
+        "cents": 2000
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 2000,
+      "reasons": [
+        "Writes to internal records are reversible and stay inside the company.",
+        "The agent estimated $0.00, but the arguments move $20.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "crm.update",
+      "estimate": 0,
+      "args": {
+        "amount": 7,
+        "total": 3
+      },
+      "verdict": "ALLOW",
+      "tier": 2,
+      "decidedBy": "internal-write",
+      "costCents": 0,
+      "reasons": [
+        "Writes to internal records are reversible and stay inside the company.",
+        "Tier 2 runs unattended but is recorded in full."
+      ]
+    },
+    {
+      "tool": "crm.read",
+      "estimate": 0,
+      "args": {
+        "total": 3
+      },
+      "verdict": "ALLOW",
+      "tier": 1,
+      "decidedBy": "read-only",
+      "costCents": 0,
+      "reasons": [
+        "Read-only lookups cannot change anything, so they run unattended."
+      ]
+    },
+    {
+      "tool": "invoice.void",
+      "estimate": 0,
+      "args": {
+        "total": 3
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (total). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "metadata": {
+          "value": "vip"
+        },
+        "amount_cents": 500
+      },
+      "verdict": "REQUIRE_APPROVAL",
+      "tier": 3,
+      "decidedBy": "cost-understated",
+      "costCents": 500,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The agent estimated $0.00, but the arguments move $5.00 — escalated for review."
+      ]
+    },
+    {
+      "tool": "payout.send",
+      "estimate": 0,
+      "args": {
+        "metadata": {
+          "value": 2
+        },
+        "amount_cents": 500
+      },
+      "verdict": "DENY",
+      "tier": 3,
+      "decidedBy": "unpriced-amount",
+      "costCents": 0,
+      "reasons": [
+        "Anything that moves money needs a person to sign off.",
+        "The arguments name an amount without a unit (metadata.value). State what the call will move in cents, as amount_cents, so it can be priced."
+      ]
+    }
+  ],
+  "ledger": {
+    "budget": {
+      "spentCents": 42000,
+      "limitCents": 50000
+    },
+    "states": [
+      [
+        "act_0001",
+        "EXECUTED",
+        "read-only",
+        0,
+        null
+      ],
+      [
+        "act_0002",
+        "EXECUTED",
+        "internal-write",
+        0,
+        null
+      ],
+      [
+        "act_0003",
+        "PENDING_APPROVAL",
+        "money-movement",
+        12400,
+        null
+      ],
+      [
+        "act_0004",
+        "PENDING_APPROVAL",
+        "customer-contact",
+        900,
+        null
+      ],
+      [
+        "act_0005",
+        "PENDING_APPROVAL",
+        "destructive",
+        0,
+        null
+      ],
+      [
+        "act_0006",
+        "BLOCKED",
+        "unknown-tool",
+        0,
+        null
+      ],
+      [
+        "act_0007",
+        "EXECUTED",
+        "cost-understated",
+        30000,
+        [
+          "you@company.com",
+          "finance@company.com"
+        ]
+      ],
+      [
+        "act_0008",
+        "BLOCKED",
+        "unpriced-amount",
+        0,
+        null
+      ],
+      [
+        "act_0009",
+        "EXECUTED",
+        "cost-understated",
+        12000,
+        null
+      ],
+      [
+        "act_0010",
+        "BLOCKED",
+        "malformed-cost",
+        0,
+        null
+      ],
+      [
+        "act_0011",
+        "REJECTED",
+        "cost-understated",
+        800,
+        null
+      ],
+      [
+        "act_0012",
+        "BLOCKED",
+        "budget-exceeded",
+        20000,
+        null
+      ]
+    ],
+    "chain": [
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "support-agent",
+        "proposalId": "act_0001",
+        "detail": {
+          "tool": "crm.read",
+          "estimated": "$0.00"
+        },
+        "seq": 1,
+        "prevHash": "GENESIS",
+        "hash": "7190a80bf83a6880d5475a30518442c2ff5fda42aa667b8abc1628f4029c22d8"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0001",
+        "detail": {
+          "verdict": "ALLOW",
+          "tier": 1,
+          "decidedBy": "read-only"
+        },
+        "seq": 2,
+        "prevHash": "7190a80bf83a6880d5475a30518442c2ff5fda42aa667b8abc1628f4029c22d8",
+        "hash": "1f2eb30fe5968222b9ab32f40f1fbaf77b8f7dc0a54a5e1656a629077215179e"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "EXECUTED",
+        "actor": "runtime",
+        "proposalId": "act_0001",
+        "detail": {
+          "tool": "crm.read",
+          "cost": "$0.00"
+        },
+        "seq": 3,
+        "prevHash": "1f2eb30fe5968222b9ab32f40f1fbaf77b8f7dc0a54a5e1656a629077215179e",
+        "hash": "bc6eb704541f696dd81b1bfa52da884ee6ac09e07190bbe8674e2c239cae21ab"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "support-agent",
+        "proposalId": "act_0002",
+        "detail": {
+          "tool": "ticket.create",
+          "estimated": "$0.00"
+        },
+        "seq": 4,
+        "prevHash": "bc6eb704541f696dd81b1bfa52da884ee6ac09e07190bbe8674e2c239cae21ab",
+        "hash": "d9fc5c19cc0895f46890787c62548da9ea217d9031a117799c8cdf10bb8f0e71"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0002",
+        "detail": {
+          "verdict": "ALLOW",
+          "tier": 2,
+          "decidedBy": "internal-write"
+        },
+        "seq": 5,
+        "prevHash": "d9fc5c19cc0895f46890787c62548da9ea217d9031a117799c8cdf10bb8f0e71",
+        "hash": "c8fbd6eb3c805fbdb037a37529c7be9a44d0606fea6018a8502d2708fc279f57"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "EXECUTED",
+        "actor": "runtime",
+        "proposalId": "act_0002",
+        "detail": {
+          "tool": "ticket.create",
+          "cost": "$0.00"
+        },
+        "seq": 6,
+        "prevHash": "c8fbd6eb3c805fbdb037a37529c7be9a44d0606fea6018a8502d2708fc279f57",
+        "hash": "87bdae7f65d54df540e47f83b385ed3c982c3efcd9c9cf2469e58eef494420bd"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0003",
+        "detail": {
+          "tool": "refund.issue",
+          "estimated": "$124.00"
+        },
+        "seq": 7,
+        "prevHash": "87bdae7f65d54df540e47f83b385ed3c982c3efcd9c9cf2469e58eef494420bd",
+        "hash": "c9c878c198e47128ebeaea99bc30dc9a0c0284b799bf3bbf3a98965ebe33a446"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0003",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "money-movement"
+        },
+        "seq": 8,
+        "prevHash": "c9c878c198e47128ebeaea99bc30dc9a0c0284b799bf3bbf3a98965ebe33a446",
+        "hash": "c69e6afe4e02e7d48f449692364a037a631fba675f1a96fca36eba65c422b1b4"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "growth-agent",
+        "proposalId": "act_0004",
+        "detail": {
+          "tool": "email.send",
+          "estimated": "$9.00"
+        },
+        "seq": 9,
+        "prevHash": "c69e6afe4e02e7d48f449692364a037a631fba675f1a96fca36eba65c422b1b4",
+        "hash": "811aebe908081a46518af11b33b25c188876b119e7720512d49c74e162049765"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0004",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "customer-contact"
+        },
+        "seq": 10,
+        "prevHash": "811aebe908081a46518af11b33b25c188876b119e7720512d49c74e162049765",
+        "hash": "aff2121843245eeef0f2755598c08b8200e6146fb7914fa557a14be50a848929"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "rogue-agent",
+        "proposalId": "act_0005",
+        "detail": {
+          "tool": "db.drop",
+          "estimated": "$0.00"
+        },
+        "seq": 11,
+        "prevHash": "aff2121843245eeef0f2755598c08b8200e6146fb7914fa557a14be50a848929",
+        "hash": "ce398fcb44a7e7ccc04af8b995cdab896f7c83157beb319526669b42aa26b10a"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0005",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "destructive"
+        },
+        "seq": 12,
+        "prevHash": "ce398fcb44a7e7ccc04af8b995cdab896f7c83157beb319526669b42aa26b10a",
+        "hash": "069b8b2ae59a5eeeecadab1828d0fe53886c39fb2047c69337eb119821b5e999"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "rogue-agent",
+        "proposalId": "act_0006",
+        "detail": {
+          "tool": "crypto.transfer",
+          "estimated": "$0.00"
+        },
+        "seq": 13,
+        "prevHash": "069b8b2ae59a5eeeecadab1828d0fe53886c39fb2047c69337eb119821b5e999",
+        "hash": "437f5921f693fbb6998d4c69413c02b461fcce3ec689ec75902c3030578a69af"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0006",
+        "detail": {
+          "verdict": "DENY",
+          "tier": 3,
+          "decidedBy": "unknown-tool"
+        },
+        "seq": 14,
+        "prevHash": "437f5921f693fbb6998d4c69413c02b461fcce3ec689ec75902c3030578a69af",
+        "hash": "2b3e75ff482e8f63b2a3ea299720bf73b23389907f5e684c96b32006da8b897a"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "BLOCKED",
+        "actor": "policy-engine",
+        "proposalId": "act_0006",
+        "detail": {
+          "why": "\"crypto.transfer\" is not a tool this agent is allowed to call."
+        },
+        "seq": 15,
+        "prevHash": "2b3e75ff482e8f63b2a3ea299720bf73b23389907f5e684c96b32006da8b897a",
+        "hash": "079f4f94492a575311b1220f8aa5ff8f1eecfa16f834e73e66ce16520dd46711"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0007",
+        "detail": {
+          "tool": "refund.issue",
+          "estimated": "$0.00"
+        },
+        "seq": 16,
+        "prevHash": "079f4f94492a575311b1220f8aa5ff8f1eecfa16f834e73e66ce16520dd46711",
+        "hash": "4520cce1753775e248adc3b92a73a68899facf31f912595506813eb00f55ff9f"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0007",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "cost-understated"
+        },
+        "seq": 17,
+        "prevHash": "4520cce1753775e248adc3b92a73a68899facf31f912595506813eb00f55ff9f",
+        "hash": "95016677939d09a592b50be0a2dabb4ebd4f0385f4085e74ca3fb06c6636693e"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "APPROVED",
+        "actor": "you@company.com",
+        "proposalId": "act_0007",
+        "detail": {
+          "note": "ok",
+          "approval": "1 of 2"
+        },
+        "seq": 18,
+        "prevHash": "95016677939d09a592b50be0a2dabb4ebd4f0385f4085e74ca3fb06c6636693e",
+        "hash": "ae82ee13187dcfa37327d13963ed6b67f5ee0c117eec4cb52951ccd6a9f691c3"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "APPROVED",
+        "actor": "finance@company.com",
+        "proposalId": "act_0007",
+        "detail": {
+          "note": "second yes",
+          "approval": "2 of 2"
+        },
+        "seq": 19,
+        "prevHash": "ae82ee13187dcfa37327d13963ed6b67f5ee0c117eec4cb52951ccd6a9f691c3",
+        "hash": "8812c53f75719b8916032221cb364321672a40a123952504b79dd1c6ac03375e"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "EXECUTED",
+        "actor": "runtime",
+        "proposalId": "act_0007",
+        "detail": {
+          "tool": "refund.issue",
+          "cost": "$300.00"
+        },
+        "seq": 20,
+        "prevHash": "8812c53f75719b8916032221cb364321672a40a123952504b79dd1c6ac03375e",
+        "hash": "ada451d9e27fb63434f667505d2e05ccc7abf3099f96f5bfcd62d3e4225673de"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0008",
+        "detail": {
+          "tool": "refund.issue",
+          "estimated": "$0.00"
+        },
+        "seq": 21,
+        "prevHash": "ada451d9e27fb63434f667505d2e05ccc7abf3099f96f5bfcd62d3e4225673de",
+        "hash": "cc451753ae06b5415aa5c3135046cf1e025a2409f784d13a836ad414764f1117"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0008",
+        "detail": {
+          "verdict": "DENY",
+          "tier": 3,
+          "decidedBy": "unpriced-amount"
+        },
+        "seq": 22,
+        "prevHash": "cc451753ae06b5415aa5c3135046cf1e025a2409f784d13a836ad414764f1117",
+        "hash": "bea15278c97890d977cfff068b78e43ae732c79745e873779d4870e17d1671d3"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "BLOCKED",
+        "actor": "policy-engine",
+        "proposalId": "act_0008",
+        "detail": {
+          "why": "The arguments name an amount without a unit (amount). State what the call will move in cents, as amount_cents, so it can be priced."
+        },
+        "seq": 23,
+        "prevHash": "bea15278c97890d977cfff068b78e43ae732c79745e873779d4870e17d1671d3",
+        "hash": "e0c8170a75ff6a04853426c9d6ba53d89a0c93b94a56c7e9fea7af608ee57ecb"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0009",
+        "detail": {
+          "tool": "stripe.refund",
+          "estimated": "$1.00"
+        },
+        "seq": 24,
+        "prevHash": "e0c8170a75ff6a04853426c9d6ba53d89a0c93b94a56c7e9fea7af608ee57ecb",
+        "hash": "6e6f62dda344b2305918c54167672f7c9b509095ce71e6a5ac99fad424465a64"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0009",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "cost-understated"
+        },
+        "seq": 25,
+        "prevHash": "6e6f62dda344b2305918c54167672f7c9b509095ce71e6a5ac99fad424465a64",
+        "hash": "151062b08ac3053be2b594ba53d545a3b68c600a6f99db8a203e1350f65cb2c5"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "APPROVED",
+        "actor": "you@company.com",
+        "proposalId": "act_0009",
+        "detail": {
+          "note": "ok"
+        },
+        "seq": 26,
+        "prevHash": "151062b08ac3053be2b594ba53d545a3b68c600a6f99db8a203e1350f65cb2c5",
+        "hash": "24d5265b92917f1db18216ce323adef12c53605c7a6b0ad758def2c233223b48"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "EXECUTED",
+        "actor": "runtime",
+        "proposalId": "act_0009",
+        "detail": {
+          "tool": "stripe.refund",
+          "cost": "$120.00"
+        },
+        "seq": 27,
+        "prevHash": "24d5265b92917f1db18216ce323adef12c53605c7a6b0ad758def2c233223b48",
+        "hash": "68399ad6f56a18e79a94673228879818b393e9fbf79c4b011565aa7d9dc85cb6"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0010",
+        "detail": {
+          "tool": "payout.send",
+          "estimated": "$0.00"
+        },
+        "seq": 28,
+        "prevHash": "68399ad6f56a18e79a94673228879818b393e9fbf79c4b011565aa7d9dc85cb6",
+        "hash": "73f289c0308afd3a5beba2b7a2712110d4b062a0da97a0a092e7c32931520b60"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0010",
+        "detail": {
+          "verdict": "DENY",
+          "tier": 3,
+          "decidedBy": "malformed-cost"
+        },
+        "seq": 29,
+        "prevHash": "73f289c0308afd3a5beba2b7a2712110d4b062a0da97a0a092e7c32931520b60",
+        "hash": "2247da6fb72975705daea786eda2e36b8053c543b6c8c1ab5ff59a124dee0f58"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "BLOCKED",
+        "actor": "policy-engine",
+        "proposalId": "act_0010",
+        "detail": {
+          "why": "The arguments ask to move -1 cents (money.cents), which is not a whole, non-negative amount."
+        },
+        "seq": 30,
+        "prevHash": "2247da6fb72975705daea786eda2e36b8053c543b6c8c1ab5ff59a124dee0f58",
+        "hash": "54f769b77852a49d21c3a600189ec8e2484281ca78ee47081eb8e377ee92f31a"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0011",
+        "detail": {
+          "tool": "crm.update",
+          "estimated": "$0.00"
+        },
+        "seq": 31,
+        "prevHash": "54f769b77852a49d21c3a600189ec8e2484281ca78ee47081eb8e377ee92f31a",
+        "hash": "24b1ef0ef3a2131abb80f86a77f69a874912f8564a13ac4df2bf49fa73f28f6f"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0011",
+        "detail": {
+          "verdict": "REQUIRE_APPROVAL",
+          "tier": 3,
+          "decidedBy": "cost-understated"
+        },
+        "seq": 32,
+        "prevHash": "24b1ef0ef3a2131abb80f86a77f69a874912f8564a13ac4df2bf49fa73f28f6f",
+        "hash": "72dd7e31943c1a578df59bbc0028239cd8552de130ab5850161f4d49ee33d866"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "REJECTED",
+        "actor": "you@company.com",
+        "proposalId": "act_0011",
+        "detail": {
+          "note": "no"
+        },
+        "seq": 33,
+        "prevHash": "72dd7e31943c1a578df59bbc0028239cd8552de130ab5850161f4d49ee33d866",
+        "hash": "fdc308cc79ba9b4685dd6ef7b98cf12fdb12fa7b526829a8128c06f74eee702f"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "PROPOSED",
+        "actor": "billing-agent",
+        "proposalId": "act_0012",
+        "detail": {
+          "tool": "refund.issue",
+          "estimated": "$0.00"
+        },
+        "seq": 34,
+        "prevHash": "fdc308cc79ba9b4685dd6ef7b98cf12fdb12fa7b526829a8128c06f74eee702f",
+        "hash": "3306349781b89588e508dcce7526e8a9a2e695343808738711c128acd922c861"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "POLICY_EVALUATED",
+        "actor": "policy-engine",
+        "proposalId": "act_0012",
+        "detail": {
+          "verdict": "DENY",
+          "tier": 3,
+          "decidedBy": "budget-exceeded"
+        },
+        "seq": 35,
+        "prevHash": "3306349781b89588e508dcce7526e8a9a2e695343808738711c128acd922c861",
+        "hash": "bb6f434148e7492d9491e3117fc55c89271517e01dc3043cf0d4b3626b940dfd"
+      },
+      {
+        "at": "2026-11-20T12:00:00.000Z",
+        "event": "BLOCKED",
+        "actor": "policy-engine",
+        "proposalId": "act_0012",
+        "detail": {
+          "why": "This would put spend at $620.00 against a $500.00 cap."
+        },
+        "seq": 36,
+        "prevHash": "bb6f434148e7492d9491e3117fc55c89271517e01dc3043cf0d4b3626b940dfd",
+        "hash": "004edd3daec43b1b62534d442ec3b7dbc316b192be09289fafa46d1d373d1ca8"
+      }
+    ]
+  }
+}
