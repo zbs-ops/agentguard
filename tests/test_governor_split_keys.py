@@ -35,15 +35,19 @@ class Clock:
         return self.now
 
 
-def second_part(first: dict, second: dict) -> State:
+def second_part(first: dict, second: dict) -> State | None:
+    """The second part's state after one yes, or None when the gate refused it outright (there
+    was nothing to approve), as agent-governance's fixture records it."""
     g = Governor(reviewer_keys=KEYS, clock=Clock())
 
     def pay(args: dict, cents: int):
         a = g.propose("billing-agent", "refund.create", {**args, "amount_cents": cents}, estimated_cost_cents=cents)
         return g.decide(a.id, True, HUMAN, note="ok", token=g.mint_token(a.id, HUMAN))
 
-    assert pay(first, 20_000).state is State.EXECUTED
-    return pay(second, 10_000).state
+    first_part = pay(first, 20_000)
+    assert first_part is not None and first_part.state is State.EXECUTED
+    second_part = pay(second, 10_000)
+    return None if second_part is None else second_part.state
 
 
 @pytest.mark.parametrize(("name", "kind"), FIXTURE["kinds"], ids=lambda x: repr(x))
@@ -103,7 +107,8 @@ def test_every_tricky_pair_gets_agent_governances_verdict(first, second, first_s
     invisible and full-width characters, JavaScript's trim (which keeps U+001C and U+0085, unlike
     Python's strip), case rules (final sigma, dotted I), numbers, booleans, emails and nesting."""
     assert first_state == "EXECUTED"
-    assert second_part(first, second).value == second_state
+    state = second_part(first, second)
+    assert (None if state is None else state.value) == second_state
 
 
 def _replay_typescript_split_keys_run() -> Governor:
@@ -156,11 +161,12 @@ def test_the_split_keys_ledger_matches_agent_governance_byte_for_byte():
 
 @pytest.mark.parametrize("depth", [30, 31, 32, 33])
 def test_nesting_is_read_as_deep_as_agent_governance_reads_it(depth):
-    """agent-governance reads an order nested 30 or 31 levels down and stops below that."""
+    """agent-governance reads an order nested 30 or 31 levels down. Since its #20, arguments
+    nested deeper than 32 levels can't be priced, so the call is refused (nothing to approve)."""
     nested: dict = {"order": "T-1"}
     for _ in range(depth):
         nested = {"n": nested}
-    expected = State.PENDING_APPROVAL if depth <= 31 else State.EXECUTED
+    expected = State.PENDING_APPROVAL if depth <= 31 else None
     assert second_part({"order": "T-1"}, nested) is expected
 
 
