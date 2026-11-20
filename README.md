@@ -4,7 +4,7 @@
 >
 > **Approach:** three deterministic guardrails, no API keys and no model calls: a policy gate for tool calls, a checker for invented values, and a benchmark for shell-command gates.
 >
-> **Proof:** 617 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
+> **Proof:** 731 tests. The checker and the benchmark are ports of work measured on real agent logs and on three shipping AI coding tools.
 
 ```bash
 pip install agentguard-eval
@@ -36,6 +36,8 @@ print(d.reason)   # "The agent estimated $1.00, but the arguments move $90.00 â€
 Eight ordered checks, each one asserted by a test: a malformed tool name is refused before it can borrow another rule, an unknown tool fails closed, a negative or non-finite cost is refused before the budget math, the budget is checked before the tier, a repeat of a money-moving or tier-3 request that is still waiting or already ran is refused, an understated or unusually large spend is escalated, and a runaway loop of writes is paused.
 
 The repeat check is there because an agent that times out waiting for an answer often just asks again; without it, a person approving both copies would pay the same refund twice. `Governor` supplies it as `History(repeat_of=...)`, so `evaluate` stays pure. Asking again after a rejection or expiry is fine, and a different order id is a different request. A ledger written by agent-governance for this case (`tests/fixtures/governance-repeat-ledger.json`) is reproduced byte for byte.
+
+The amount is read however it's written. Any argument whose name ends in cents counts, at any depth (`amount_cents`, `amountCents`, `amountcents`, `{"refund": {"cents": 30000}}`), a list of line items counts as their sum, and the call is charged the largest of these and the estimate. On a tool that moves money, a number named like an amount with no unit (`amount`, `total`, `price`, `value`, `sum`, `totalamount`) is refused as `unpriced-amount`, because `amount: 300` is $3.00 to Stripe and $300 to most other APIs; the reason asks for `amount_cents`. Arguments nested more than 32 levels deep are refused rather than half read. agent-governance's answers for 103 argument shapes and a ledger (`tests/fixtures/governance-amounts.json`) are matched exactly, reasons included.
 
 `evaluate` judges one call. `Governor` runs the whole approval workflow around it: it holds what's waiting for a person, checks who is approving, charges the budget only when something actually runs, and writes every step to a hash-chained ledger.
 
