@@ -36,6 +36,7 @@ from typing import Any
 
 from agentguard.gate.ledger import ChainVerification, Entry, append_entry, verify_chain
 from agentguard.gate.policy import (
+    _JS_SPACE,
     TWO_PERSON_ABOVE_CENTS,
     UNATTENDED_WINDOW_SECONDS,
     Budget,
@@ -492,9 +493,6 @@ def target_kind(name: str) -> str | None:
     return words[-1] if words and words[-1] in TARGET_KINDS else None
 
 
-#: What JavaScript's ``String.prototype.trim`` removes (WhiteSpace and LineTerminator). Python's
-#: ``str.strip()`` also removes U+001C-U+001F and U+0085, which agent-governance keeps.
-_JS_SPACE = "\t\n\v\f\r                  　﻿"
 _EMAIL_TAG = re.compile(r"\+[^@]*@")
 # JavaScript's ``\s`` is the same set as its trim, which differs from Python's ``\s``.
 _NUMBER_FORMATTING = re.compile("[" + re.escape(_JS_SPACE) + r".()-]")
